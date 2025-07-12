@@ -1,0 +1,74 @@
+/* 登录注册页专用样式，风格与个人信息页一致 */
+
+.login-register-field {
+  margin-bottom: 22px;
+}
+
+.login-register-form input[type="text"],
+.login-register-form input[type="password"] {
+  width: 100%;
+  padding: 18px 18px;
+  border-radius: 10px;
+  border: 1.5px solid #d1d5db;
+  font-size: 20px;
+  background: #fff;
+  color: #444;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  line-height: 1.6;
+}
+
+.login-register-form input[type="text"]:focus,
+.login-register-form input[type="password"]:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px #646cff22;
+  outline: none;
+}
+
+.login-register-form input[type="text"]::placeholder,
+.login-register-form input[type="password"]::placeholder {
+  color: #bbb;
+  font-size: 18px;
+}
+
+.login-register-form button[type="submit"] {
+  width: 100%;
+  margin-top: 10px;
+  padding: 16px 0;
+  background: linear-gradient(90deg, #646cff 0%, #4f8cff 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 22px;
+  cursor: pointer;
+  /* box-shadow: 0 2px 8px #e0e7ef; */
+  transition: background 0.2s;
+  letter-spacing: 1px;
+}
+
+.login-register-form button[type="submit"]:hover {
+  background: linear-gradient(90deg, #4f8cff 0%, #646cff 100%);
+}
+
+.login-register-form a {
+  color: #646cff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-register-form a:hover {
+  color: #4f8cff;
+}
+
+.login-bg {
+  /* 替换url(...)为你自己的图片路径 */
+  background-image: url('/src/assets/lifting1.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* 可选：加个半透明遮罩提升可读性 */
+  /* position: relative; */
+  /* z-index: 1; */
+} 

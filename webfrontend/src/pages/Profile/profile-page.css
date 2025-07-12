@@ -1,0 +1,7 @@
+input::placeholder, select:invalid, select option[value=''] {
+  color: #bbb !important;
+}
+
+input, select, option {
+  color: #444;
+} 
