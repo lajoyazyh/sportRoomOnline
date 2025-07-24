@@ -52,7 +52,7 @@ function LoginRegister() {
         ) : (
           <Register setSuccess={handleRegisterSuccess} />
         )}
-        {success && <div style={{ color: 'green', marginBottom: 8 }}>{success}</div>}
+        
         <div style={{ marginTop: 16 }}>
           {mode === 'login' ? (
             <span>

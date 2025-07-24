@@ -30,13 +30,6 @@ function Login({ setSuccess: onSuccess }) {
       setSuccess(err.message || '登录失败');
       setSuccessState(false);
     }
-    // 只要不是登录成功，强制显示“登录失败”
-    setTimeout(() => {
-      if (successState !== true) {
-        setSuccess('登录失败');
-        setSuccessState(false);
-      }
-    }, 0);
   };
 
   return (
@@ -59,12 +52,13 @@ function Login({ setSuccess: onSuccess }) {
           onChange={handleChange}
         />
       </div>
-      {success && (
-        <div style={{ color: successState === true ? 'green' : 'red', marginBottom: 8 }}>{success}</div>
-      )}
+      
       <button type="submit">
         登录
       </button>
+      {success && (
+        <div style={{ color: successState === true ? 'green' : 'red', marginBottom: 8 }}>{success}</div>
+      )}
     </form>
   );
 }
