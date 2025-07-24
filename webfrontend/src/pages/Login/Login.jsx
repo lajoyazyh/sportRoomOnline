@@ -23,6 +23,10 @@ function Login({ setSuccess: onSuccess }) {
     // ===================== 后续对接后端API：登录 =====================
     try {
       const data = await loginApi({ username: form.username, password: form.password });
+      console.log('loginApi返回的数据:', data);
+      // 保存token到本地存储
+      localStorage.setItem('token', data.token);
+      console.log('登录成功，保存的token:', data.token);
       setSuccess(data.message || '登录成功');
       setSuccessState(true);
       if (onSuccess) onSuccess(data.message || '登录成功');
@@ -63,4 +67,4 @@ function Login({ setSuccess: onSuccess }) {
   );
 }
 
-export default Login; 
+export default Login;

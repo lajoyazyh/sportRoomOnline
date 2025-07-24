@@ -12,12 +12,12 @@ export class HomeController {
     return 'Hello Midwayjs!';
   }
 
-  @Get('/register')
-  public async register(
-    @Query('username') username: string,
-    @Query('password') password: string
-  ): Promise<boolean> {
-    console.log(username, password);
-    return true;
-  }
+  // @Get('/register')
+  // public async register(
+  //   @Query('username') username: string,
+  //   @Query('password') password: string
+  // ): Promise<boolean> {
+  //   console.log(username, password);
+  //   return true;
+  // }
 }

@@ -13,7 +13,7 @@ function LoginRegister() {
   // 登录成功后跳转到首页
   const handleLoginSuccess = (msg) => {
     setSuccess(msg || "登陆成功");
-    if (msg === '登录成功') { // 只有后端返回成功时才跳转
+    if (msg === '登录成功' || success) { // 只有后端返回成功时才跳转
       setTimeout(() => setIsHome(true), 500);
     }
   };
