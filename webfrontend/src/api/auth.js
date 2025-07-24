@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = '/api/user';
 
 // 登录
 export async function loginApi({ username, password }) {
