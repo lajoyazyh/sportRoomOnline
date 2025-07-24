@@ -12,7 +12,7 @@ const navs = [
   { key: 'profile', label: '个人信息' },
 ];
 
-function Home() {
+function Home({ onLogout }) {
   const [active, setActive] = useState('home');
 
   // 预留各页面内容
@@ -31,6 +31,14 @@ function Home() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    if (onLogout) {
+      onLogout();
+    }
+    window.location.reload();
+  };
+
   return (
     <div>
       <nav style={{
@@ -45,6 +53,7 @@ function Home() {
         left: 0,
         width: '100%',
         zIndex: 1000,
+        boxSizing: 'border-box',
       }}>
         <div style={{ fontWeight: 'bold', fontSize: 20, marginRight: 32 }}>LOGO</div>
         {navs.map((item) => (
@@ -67,6 +76,24 @@ function Home() {
             {item.label}
           </button>
         ))}
+        <button
+          onClick={handleLogout}
+          style={{
+            marginLeft: 'auto',
+            marginRight: '2rem',
+            background: '#ff4d4f',
+            color: '#fff',
+            border: 'none',
+            padding: '8px 18px',
+            borderRadius: 6,
+            fontWeight: 500,
+            cursor: 'pointer',
+            fontSize: 16,
+            transition: 'background 0.2s',
+          }}
+        >
+          退出登录
+        </button>
       </nav>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: 24, paddingTop: 80 }}>
         {renderContent()}
@@ -75,4 +102,4 @@ function Home() {
   );
 }
 
-export default Home; 
+export default Home;

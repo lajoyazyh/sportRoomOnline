@@ -28,7 +28,7 @@ function LoginRegister() {
   };
 
   if (isHome) {
-    return <Home />;
+    return <Home onLogout={() => setIsHome(false)} />
   }
 
   // 如需插入背景图片，直接在.login-bg设置background-image即可
@@ -75,4 +75,4 @@ function LoginRegister() {
   );
 }
 
-export default LoginRegister; 
+export default LoginRegister;
