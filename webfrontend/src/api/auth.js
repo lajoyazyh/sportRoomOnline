@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = '/api/user';
 
 // 登录
 export async function loginApi({ username, password }) {
@@ -14,8 +14,12 @@ export async function loginApi({ username, password }) {
   } catch {
     throw new Error('服务器响应格式错误');
   }
-  if (!res.ok || !data.success) throw new Error(data.message || '登录失败');
-  return data;
+  console.log('登录响应数据:', data);
+  if (!res.ok) throw new Error(`登录失败: ${res.status}`);
+  // 支持多种后端响应格式提取token
+  const token = data.token || (data.data && data.data.token);
+  if (!token) throw new Error('登录响应中未包含token，请检查后端配置');
+  return { ...data, token };
 }
 
 // 注册
@@ -34,4 +38,4 @@ export async function registerApi({ username, password }) {
   }
   if (!res.ok || !data.success) throw new Error(data.message || '注册失败');
   return data;
-} 
+}

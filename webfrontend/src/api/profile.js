@@ -1,10 +1,26 @@
-const API_BASE = '/api';
+const API_BASE = '/api/user';
 
 // 获取个人信息
 export async function getProfileApi() {
-  const res = await fetch(`${API_BASE}/profile`, { credentials: 'include' });
-  if (!res.ok) throw new Error('获取个人信息失败');
-  return res.json();
+  const token = localStorage.getItem('token');
+  console.log('发送的token:', token);
+  const res = await fetch(`${API_BASE}/profile`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    credentials: 'include'
+  });
+  console.log('Profile API响应状态:', res.status);
+  if (!res.ok) {
+    const error = await res.text().catch(() => '未知错误');
+    console.error('获取个人信息失败:', error);
+    throw new Error(`获取个人信息失败: ${res.status} ${error}`);
+  }
+  const data = await res.json();
+  console.log('获取到的用户信息:', data);
+  // 无论HTTP状态码如何，只要success为false就抛出错误
+  if (!data.success) {
+    throw new Error(data.message || '获取个人信息失败');
+  }
+  return data;
 }
 
 // 更新个人信息
@@ -43,4 +59,4 @@ export async function uploadPhotoApi(file) {
   });
   if (!res.ok) throw new Error('上传照片失败');
   return res.json();
-} 
+}

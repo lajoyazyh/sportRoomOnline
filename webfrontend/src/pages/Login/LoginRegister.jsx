@@ -13,7 +13,7 @@ function LoginRegister() {
   // 登录成功后跳转到首页
   const handleLoginSuccess = (msg) => {
     setSuccess(msg || "登陆成功");
-    if (msg === '登录成功') { // 只有后端返回成功时才跳转
+    if (msg === '登录成功' || success) { // 只有后端返回成功时才跳转
       setTimeout(() => setIsHome(true), 500);
     }
   };
@@ -28,7 +28,7 @@ function LoginRegister() {
   };
 
   if (isHome) {
-    return <Home />;
+    return <Home onLogout={() => setIsHome(false)} />
   }
 
   // 如需插入背景图片，直接在.login-bg设置background-image即可
@@ -52,7 +52,7 @@ function LoginRegister() {
         ) : (
           <Register setSuccess={handleRegisterSuccess} />
         )}
-        {success && <div style={{ color: 'green', marginBottom: 8 }}>{success}</div>}
+        
         <div style={{ marginTop: 16 }}>
           {mode === 'login' ? (
             <span>
@@ -75,4 +75,4 @@ function LoginRegister() {
   );
 }
 
-export default LoginRegister; 
+export default LoginRegister;

@@ -23,6 +23,10 @@ function Login({ setSuccess: onSuccess }) {
     // ===================== 后续对接后端API：登录 =====================
     try {
       const data = await loginApi({ username: form.username, password: form.password });
+      console.log('loginApi返回的数据:', data);
+      // 保存token到本地存储
+      localStorage.setItem('token', data.token);
+      console.log('登录成功，保存的token:', data.token);
       setSuccess(data.message || '登录成功');
       setSuccessState(true);
       if (onSuccess) onSuccess(data.message || '登录成功');
@@ -30,13 +34,6 @@ function Login({ setSuccess: onSuccess }) {
       setSuccess(err.message || '登录失败');
       setSuccessState(false);
     }
-    // 只要不是登录成功，强制显示“登录失败”
-    setTimeout(() => {
-      if (successState !== true) {
-        setSuccess('登录失败');
-        setSuccessState(false);
-      }
-    }, 0);
   };
 
   return (
@@ -59,14 +56,15 @@ function Login({ setSuccess: onSuccess }) {
           onChange={handleChange}
         />
       </div>
-      {success && (
-        <div style={{ color: successState === true ? 'green' : 'red', marginBottom: 8 }}>{success}</div>
-      )}
+      
       <button type="submit">
         登录
       </button>
+      {success && (
+        <div style={{ color: successState === true ? 'green' : 'red', marginBottom: 8 }}>{success}</div>
+      )}
     </form>
   );
 }
 
-export default Login; 
+export default Login;
