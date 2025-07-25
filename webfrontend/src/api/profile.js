@@ -1,12 +1,14 @@
 const API_BASE = '/api/user';
 
 // 获取个人信息
-export async function getProfileApi() {
+// 添加signal参数以支持请求取消
+export async function getProfileApi({ signal } = {}) {
   const token = localStorage.getItem('token');
   console.log('发送的token:', token);
   const res = await fetch(`${API_BASE}/profile`, {
     headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-    credentials: 'include'
+    credentials: 'include',
+    signal // 将signal传递给fetch请求
   });
   console.log('Profile API响应状态:', res.status);
   if (!res.ok) {
