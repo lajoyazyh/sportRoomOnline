@@ -1,44 +1,14 @@
-// Home.jsx
-// 顶部导航栏页面。后续可通过React Router等方式实现页面跳转，当前为本地状态切换。
-// 预留：可在useEffect中请求后端接口获取用户信息、活动数据等。
-// TODO: 集成后端API、完善各页面内容。
-import { useState } from 'react';
+import { Outlet, Link } from 'react-router-dom';
 import ProfilePage from '../Profile/ProfilePage';
 
 const navs = [
-  { key: 'home', label: '首页' },
-  { key: 'square', label: '活动广场' },
-  { key: 'manage', label: '活动管理' },
-  { key: 'profile', label: '个人信息' },
+  { key: 'home', label: '首页', path: '/home' },
+  { key: 'square', label: '活动广场', path: '/home/square' },
+  { key: 'manage', label: '活动管理', path: '/home/manage' },
+  { key: 'profile', label: '个人信息', path: '/home/profile' },
 ];
 
-function Home({ onLogout }) {
-  const [active, setActive] = useState('home');
-
-  // 预留各页面内容
-  const renderContent = () => {
-    switch (active) {
-      case 'home':
-        return <div>欢迎来到首页！</div>;
-      case 'square':
-        return <div>活动广场（待实现）</div>;
-      case 'manage':
-        return <div>活动管理（待实现）</div>;
-      case 'profile':
-        return <ProfilePage />;
-      default:
-        return null;
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    if (onLogout) {
-      onLogout();
-    }
-    // window.location.reload();
-  };
-
+function HomePage({ onLogout }) {
   return (
     <div>
       <nav style={{
@@ -57,12 +27,13 @@ function Home({ onLogout }) {
       }}>
         <div style={{ fontWeight: 'bold', fontSize: 20, marginRight: 32 }}>LOGO</div>
         {navs.map((item) => (
-          <button
+          <Link
             key={item.key}
-            onClick={() => setActive(item.key)}
+            to={item.path}
             style={{
-              background: active === item.key ? '#646cff' : 'transparent',
-              color: active === item.key ? '#fff' : '#ccc',
+              background: 'transparent',
+              color: '#ccc',
+              textDecoration: 'none',
               border: 'none',
               padding: '8px 18px',
               marginRight: 8,
@@ -71,13 +42,17 @@ function Home({ onLogout }) {
               cursor: 'pointer',
               fontSize: 16,
               transition: 'background 0.2s',
+              '&.active': {
+                background: '#646cff',
+                color: '#fff'
+              }
             }}
           >
             {item.label}
-          </button>
+          </Link>
         ))}
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           style={{
             marginLeft: 'auto',
             marginRight: '2rem',
@@ -96,10 +71,10 @@ function Home({ onLogout }) {
         </button>
       </nav>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: 24, paddingTop: 80 }}>
-        {renderContent()}
+        <Outlet />
       </div>
     </div>
   );
 }
 
-export default Home;
+export default HomePage;
