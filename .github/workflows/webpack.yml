@@ -26,6 +26,6 @@ jobs:
       run: npm install
       working-directory: ./webfrontend   # 🟢 修改为你的 package.json 所在路径
 
-    - name: Build with Webpack
-      run: npm run dev
-      working-directory: ./webfrontend   # 🟢 同上
+    - name: Build with Vite
+      run: npm run build
+      working-directory: ./webfrontend
