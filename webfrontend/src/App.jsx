@@ -3,6 +3,10 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import LoginPage from './pages/Login/LoginPage';
 import RegisterPage from './pages/Register/RegisterPage';
 import HomePage from './pages/Home/HomePage';
+import HomeDashboard from './pages/Home/HomeDashboard';
+import SquarePage from './pages/Square/SquarePage';
+import ManagePage from './pages/Manage/ManagePage';
+import ProfilePage from './pages/Profile/ProfilePage';
 import { getProfileApi } from './api/profile';
 
 function App() {
@@ -18,15 +22,13 @@ function App() {
     const verifyAuth = async () => {
       try {
         const userData = await getProfileApi({ signal: abortController.signal });
-        
-        // 验证用户数据是否包含基本标识信息
-        const userInfo = userData.data || userData;
-        if (!userInfo || (!userInfo.id && !userInfo.username)) {
-          throw new Error('无效的用户数据');
+
+        // 直接使用API返回数据，不进行额外验证
+        setUser(userData.data || userData);
+        // 仅在当前不在/home路径下时才导航
+        if (!location.pathname.startsWith('/home')) {
+          navigate('/home');
         }
-        
-        setUser(userInfo);
-        navigate('/home');
       } catch (error) {
         // 无论何种错误都重置用户状态
         setUser(null);
@@ -61,7 +63,12 @@ function App() {
       <Route path="/home" element={user ? <HomePage onLogout={() => {
         setUser(null);
         navigate('/login');
-      }} /> : <Navigate to="/login" />} />
+      }} /> : <Navigate to="/login" />}>
+        <Route index element={<HomeDashboard />} />
+        <Route path="square" element={<SquarePage />} />
+        <Route path="manage" element={<ManagePage />} />
+        <Route path="profile" element={<ProfilePage />} />
+      </Route>
       
       {/* 重定向规则 */}
       <Route path="/" element={<Navigate to="/login" />} />
