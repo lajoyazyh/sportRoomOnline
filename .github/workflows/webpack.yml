@@ -22,7 +22,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
-      run: |
-        npm install
-        npm run dev
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./webfrontend   # 🟢 修改为你的 package.json 所在路径
+
+    - name: Build with Webpack
+      run: npm run dev
+      working-directory: ./webfrontend   # 🟢 同上
