@@ -26,9 +26,13 @@ function LoginPage({ onLoginSuccess }) {
 
     try {
       setLoading(true);
+      // 1. 调用登录API
       const response = await loginApi({ username: form.username, password: form.password });
+      // 2. 保存token到localStorage
       localStorage.setItem('token', response.token);
+      // 3. 调用登录成功回调
       onLoginSuccess(response.data || response.user);
+      // 4. 导航到首页
       navigate('/home');
     } catch (err) {
       setError(err.message || '登录失败，请检查用户名和密码');
