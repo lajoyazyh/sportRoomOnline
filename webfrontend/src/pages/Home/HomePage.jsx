@@ -36,7 +36,7 @@ function Home({ onLogout }) {
     if (onLogout) {
       onLogout();
     }
-    window.location.reload();
+    // window.location.reload();
   };
 
   return (
