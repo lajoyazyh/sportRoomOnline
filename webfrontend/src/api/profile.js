@@ -1,4 +1,4 @@
-const API_BASE = '/api/user';
+const API_BASE = 'http://localhost:7001/api/user';
 
 // 获取个人信息
 // 添加signal参数以支持请求取消
@@ -27,14 +27,21 @@ export async function getProfileApi({ signal } = {}) {
 
 // 更新个人信息
 export async function updateProfileApi(profile) {
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/profile`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify(profile),
   });
   if (!res.ok) throw new Error('保存个人信息失败');
-  return res.json();
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '保存个人信息失败');
+  }
+  return data;
 }
 
 // 上传头像

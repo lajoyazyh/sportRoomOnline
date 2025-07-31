@@ -60,7 +60,7 @@ function App() {
   return (
     <Routes>
       {/* 公共路由 */}
-      <Route path="/login" element={!user ? <LoginPage onLoginSuccess={() => setUser(true)} /> : <Navigate to="/home" />} />
+      <Route path="/login" element={!user ? <LoginPage onLoginSuccess={(userData) => setUser(userData)} /> : <Navigate to="/home" />} />
       <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/home" />} />
       
       {/* 需要授权的路由 */}

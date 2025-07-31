@@ -3,7 +3,7 @@ import { InjectEntityModel } from '@midwayjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@midwayjs/jwt';
 import { User } from '../entity/user.entity';
-import { RegisterDTO, LoginDTO } from '../dto/user.dto';
+import { RegisterDTO, LoginDTO, UpdateProfileDTO } from '../dto/user.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Provide()
@@ -25,6 +25,14 @@ export class UserService {
       username: user.username,
       email: user.email,
       phone: user.phone,
+      nickname: user.nickname,
+      name: user.name,
+      age: user.age,
+      gender: user.gender,
+      height: user.height,
+      weight: user.weight,
+      bodyType: user.bodyType,
+      avatar: user.avatar,
       createdAt: user.createdAt,
     };
   }
@@ -112,5 +120,34 @@ export class UserService {
     } catch (error) {
       throw new Error('无效的认证令牌');
     }
+  }
+
+  // 更新用户Profile信息
+  async updateProfile(
+    userid: number,
+    profileData: UpdateProfileDTO
+  ): Promise<any> {
+    const user = await this.userModel.findOne({
+      where: { userid: userid },
+    });
+
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+
+    // 更新用户信息
+    await this.userModel.update(userid, {
+      nickname: profileData.nickname,
+      name: profileData.name,
+      age: profileData.age,
+      gender: profileData.gender,
+      height: profileData.height,
+      weight: profileData.weight,
+      bodyType: profileData.bodyType,
+      avatar: profileData.avatar,
+    });
+
+    // 返回更新后的用户信息
+    return await this.getUser({ uid: userid });
   }
 }

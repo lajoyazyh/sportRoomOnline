@@ -1,6 +1,14 @@
-import { Controller, Post, Body, Inject, Get, Headers } from '@midwayjs/core';
+import {
+  Controller,
+  Post,
+  Body,
+  Inject,
+  Get,
+  Headers,
+  Put,
+} from '@midwayjs/core';
 import { UserService } from '../service/user.service';
-import { RegisterDTO, LoginDTO } from '../dto/user.dto';
+import { RegisterDTO, LoginDTO, UpdateProfileDTO } from '../dto/user.dto';
 
 @Controller('/api/user')
 export class UserController {
@@ -72,6 +80,41 @@ export class UserController {
       return {
         success: false,
         message: error.message || '获取用户信息失败',
+      };
+    }
+  }
+
+  @Put('/profile')
+  async updateProfile(
+    @Headers('authorization') authHeader: string,
+    @Body() profileData: UpdateProfileDTO
+  ) {
+    try {
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return {
+          success: false,
+          message: '缺少认证令牌',
+        };
+      }
+
+      const token = authHeader.substring(7);
+      const payload = await this.userService.validateToken(token);
+
+      // 更新用户Profile信息
+      const updatedUser = await this.userService.updateProfile(
+        payload.userid,
+        profileData
+      );
+
+      return {
+        success: true,
+        message: '更新用户信息成功',
+        data: updatedUser,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || '更新用户信息失败',
       };
     }
   }

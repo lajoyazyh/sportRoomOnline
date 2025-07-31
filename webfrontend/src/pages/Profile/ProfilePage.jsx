@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ProfilePreview from './ProfilePreview';
+import { getProfileApi, updateProfileApi } from '../../api/profile';
 
 function ProfilePage() {
   const [profile, setProfile] = useState({
@@ -13,12 +14,43 @@ function ProfilePage() {
     weight: '',
   });
   const [editMsg, setEditMsg] = useState('');
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef();
   const [photos, setPhotos] = useState([]); // 照片墙
   const photoInputRef = useRef();
   const MAX_PHOTOS = 6;
   const [visitorMode, setVisitorMode] = useState(false);
   const [likeCount] = useState(123); // 示例点赞数，可后续对接后端
+
+  // 组件加载时获取用户资料
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await getProfileApi();
+        if (response.success && response.data) {
+          const userData = response.data;
+          setProfile({
+            avatar: userData.avatar || '',
+            nickname: userData.nickname || '',
+            name: userData.name || '',
+            age: userData.age || '',
+            gender: userData.gender || '',
+            bodyType: userData.bodyType || '',
+            height: userData.height || '',
+            weight: userData.weight || '',
+          });
+        }
+      } catch (error) {
+        console.error('加载用户资料失败:', error);
+        setEditMsg('加载用户资料失败: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   return (
     <div className="max-w-[520px] mx-auto py-10 px-10 pb-8 relative">
@@ -27,11 +59,32 @@ function ProfilePage() {
         <ProfilePreview profile={profile} photos={photos} likeCount={likeCount} />
       ) : (
         <form
-          onSubmit={e => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            // ===================== 后续对接后端API：保存个人信息 =====================
-            setEditMsg('保存成功！（演示）');
-            // TODO: 这里可调用后端API保存
+            try {
+              setLoading(true);
+              setEditMsg('');
+              
+              // 调用后端API保存个人信息
+              const response = await updateProfileApi({
+                nickname: profile.nickname,
+                name: profile.name,
+                age: profile.age ? parseInt(profile.age) : null,
+                gender: profile.gender,
+                bodyType: profile.bodyType,
+                height: profile.height ? parseFloat(profile.height) : null,
+                weight: profile.weight ? parseFloat(profile.weight) : null,
+              });
+              
+              if (response.success) {
+                setEditMsg('保存成功！');
+              }
+            } catch (error) {
+              console.error('保存失败:', error);
+              setEditMsg('保存失败: ' + error.message);
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
@@ -139,8 +192,24 @@ function ProfilePage() {
               style={{ flex: 1, padding: '12px 14px', borderRadius: 8, border: '1.5px solid #d1d5db', fontSize: 16, background: '#f7fafd', color: '#222' }}
             />
           </div>
-          <button type="submit" style={{ width: '100%', marginTop: 10, padding: '12px 0', background: 'linear-gradient(90deg, #646cff 0%, #4f8cff 100%)', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 18, cursor: 'pointer', boxShadow: '0 2px 8px #e0e7ef' }}>
-            保存
+          <button 
+            type="submit" 
+            disabled={loading}
+            style={{ 
+              width: '100%', 
+              marginTop: 10, 
+              padding: '12px 0', 
+              background: loading ? '#ccc' : 'linear-gradient(90deg, #646cff 0%, #4f8cff 100%)', 
+              color: '#fff', 
+              border: 'none', 
+              borderRadius: 8, 
+              fontWeight: 600, 
+              fontSize: 18, 
+              cursor: loading ? 'not-allowed' : 'pointer', 
+              boxShadow: '0 2px 8px #e0e7ef' 
+            }}
+          >
+            {loading ? '保存中...' : '保存'}
           </button>
           {editMsg && <div style={{ color: '#1cb47c', marginTop: 16, textAlign: 'center', fontWeight: 500 }}>{editMsg}</div>}
         </form>
