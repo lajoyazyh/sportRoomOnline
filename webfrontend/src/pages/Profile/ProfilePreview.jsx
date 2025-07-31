@@ -3,54 +3,89 @@ import React from 'react';
 function ProfilePreview({ profile, photos, likeCount }) {
   return (
     <div>
-      <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div
-          style={{
-            width: 110, height: 110, borderRadius: '50%', background: 'linear-gradient(135deg, #e0e7ef 0%, #fff 100%)', margin: '0 auto', overflow: 'hidden',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2.5px solid #c7d0e0',
-            boxShadow: '0 2px 8px #e0e7ef',
-          }}
-        >
+      {/* 头像和点赞数 */}
+      <div className="text-center mb-7">
+        <div className="w-[110px] h-[110px] rounded-full bg-gradient-to-br from-gray-200 to-white mx-auto overflow-hidden flex items-center justify-center border-[2.5px] border-gray-300 shadow-md">
           {profile.avatar ? (
-            <img src={profile.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
           ) : (
-            <span style={{ color: '#b0b8c9', fontSize: 16 }}>暂无头像</span>
+            <span className="text-gray-400 text-base">暂无头像</span>
           )}
         </div>
         {/* 点赞数及大拇指图标预留位 */}
-        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <div className="mt-3.5 flex items-center justify-center gap-1.5">
           {/* ===================== TODO: 在此处插入大拇指图片（如/thumb-up.svg） ===================== */}
-          <span style={{ fontSize: 18, color: '#888' }}>{likeCount}</span>
+          <span className="text-lg text-gray-600">👍 {likeCount}</span>
         </div>
       </div>
-      <div style={{ marginBottom: 18, fontSize: 18, fontWeight: 600, letterSpacing: 0.5 }}><span style={{ color: '#646cff', fontWeight: 700 }}>昵称：</span><span style={{ color: '#bbb' }}>{profile.nickname || '暂无'}</span></div>
-      <div style={{ marginBottom: 18, fontSize: 18, fontWeight: 600, letterSpacing: 0.5 }}><span style={{ color: '#646cff', fontWeight: 700 }}>姓名：</span><span style={{ color: '#bbb' }}>{profile.name || '暂无'}</span></div>
-      <div style={{ marginBottom: 18, fontSize: 18, fontWeight: 600, letterSpacing: 0.5 }}><span style={{ color: '#646cff', fontWeight: 700 }}>年龄：</span><span style={{ color: '#bbb' }}>{profile.age || '暂无'}</span></div>
-      <div style={{ marginBottom: 18, fontSize: 18, fontWeight: 600, letterSpacing: 0.5 }}><span style={{ color: '#646cff', fontWeight: 700 }}>性别：</span><span style={{ color: '#bbb' }}>{profile.gender === 'male' ? '男' : profile.gender === 'female' ? '女' : profile.gender === 'other' ? '其他' : '暂无'}</span></div>
-      <div style={{ marginBottom: 18, fontSize: 18, fontWeight: 600, letterSpacing: 0.5 }}><span style={{ color: '#646cff', fontWeight: 700 }}>体型：</span><span style={{ color: '#bbb' }}>{
-        profile.bodyType === 'slim' ? '偏瘦' :
-        profile.bodyType === 'normal' ? '标准' :
-        profile.bodyType === 'muscular' ? '健壮' :
-        profile.bodyType === 'plump' ? '偏胖' : '暂无'}</span></div>
-      <div style={{ marginBottom: 18, fontSize: 18, fontWeight: 600, letterSpacing: 0.5 }}><span style={{ color: '#646cff', fontWeight: 700 }}>身高：</span><span style={{ color: '#bbb' }}>{profile.height ? profile.height + ' cm' : '暂无'}</span></div>
-      <div style={{ marginBottom: 32, fontSize: 18, fontWeight: 600, letterSpacing: 0.5 }}><span style={{ color: '#646cff', fontWeight: 700 }}>体重：</span><span style={{ color: '#bbb' }}>{profile.weight ? profile.weight + ' kg' : '暂无'}</span></div>
+
+      {/* 个人信息展示 */}
+      <div className="space-y-5">
+        <div className="text-lg font-semibold tracking-wide flex items-baseline">
+          <span className="text-indigo-600 font-bold">昵称：</span>
+          <span className="text-slate-700 ml-2 font-medium text-xl">{profile.nickname || <span className="text-gray-400 text-base italic">暂无</span>}</span>
+        </div>
+        <div className="text-lg font-semibold tracking-wide flex items-baseline">
+          <span className="text-indigo-600 font-bold">姓名：</span>
+          <span className="text-slate-700 ml-2 font-medium text-xl">{profile.name || <span className="text-gray-400 text-base italic">暂无</span>}</span>
+        </div>
+        <div className="text-lg font-semibold tracking-wide flex items-baseline">
+          <span className="text-indigo-600 font-bold">年龄：</span>
+          <span className="text-slate-700 ml-2 font-medium text-xl">{profile.age ? `${profile.age} 岁` : <span className="text-gray-400 text-base italic">暂无</span>}</span>
+        </div>
+        <div className="text-lg font-semibold tracking-wide flex items-baseline">
+          <span className="text-indigo-600 font-bold">性别：</span>
+          <span className="text-slate-700 ml-2 font-medium text-xl">
+            {profile.gender === 'male' ? '👨 男' : 
+             profile.gender === 'female' ? '👩 女' : 
+             profile.gender === 'other' ? '⚧ 其他' : 
+             <span className="text-gray-400 text-base italic">暂无</span>}
+          </span>
+        </div>
+        <div className="text-lg font-semibold tracking-wide flex items-baseline">
+          <span className="text-indigo-600 font-bold">体型：</span>
+          <span className="text-slate-700 ml-2 font-medium text-xl">
+            {profile.bodyType === 'slim' ? '🏃‍♂️ 偏瘦' :
+             profile.bodyType === 'normal' ? '🚶‍♂️ 标准' :
+             profile.bodyType === 'muscular' ? '💪 健壮' :
+             profile.bodyType === 'plump' ? '🤵 偏胖' : 
+             <span className="text-gray-400 text-base italic">暂无</span>}
+          </span>
+        </div>
+        <div className="text-lg font-semibold tracking-wide flex items-baseline">
+          <span className="text-indigo-600 font-bold">身高：</span>
+          <span className="text-slate-700 ml-2 font-medium text-xl">
+            {profile.height ? (
+              <>📏 <span className="font-bold text-emerald-600">{profile.height}</span> cm</>
+            ) : (
+              <span className="text-gray-400 text-base italic">暂无</span>
+            )}
+          </span>
+        </div>
+        <div className="text-lg font-semibold tracking-wide mb-8 flex items-baseline">
+          <span className="text-indigo-600 font-bold">体重：</span>
+          <span className="text-slate-700 ml-2 font-medium text-xl">
+            {profile.weight ? (
+              <>⚖️ <span className="font-bold text-emerald-600">{profile.weight}</span> kg</>
+            ) : (
+              <span className="text-gray-400 text-base italic">暂无</span>
+            )}
+          </span>
+        </div>
+      </div>
+      
       {/* 照片墙展示 */}
-      <div style={{ marginTop: 40 }}>
-        <div style={{ fontWeight: 600, fontSize: 18, color: '#222', marginBottom: 12 }}>照片墙</div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 16,
-          minHeight: 120,
-        }}>
+      <div className="mt-10">
+        <div className="font-semibold text-lg text-gray-800 mb-3">照片墙</div>
+        <div className="grid grid-cols-3 gap-4 min-h-[120px]">
           {photos && photos.length > 0 ? (
             photos.map((src, idx) => (
-              <div key={idx} style={{ borderRadius: 10, overflow: 'hidden', boxShadow: '0 2px 8px #e0e7ef', background: '#fff' }}>
-                <img src={src} alt={`user-photo-${idx}`} style={{ width: '100%', height: 110, objectFit: 'cover', display: 'block' }} />
+              <div key={idx} className="rounded-lg overflow-hidden shadow-md bg-white">
+                <img src={src} alt={`user-photo-${idx}`} className="w-full h-[110px] object-cover block" />
               </div>
             ))
           ) : (
-            <div style={{ gridColumn: '1 / span 3', color: '#aaa', textAlign: 'center', padding: 32 }}>暂无照片</div>
+            <div className="col-span-3 text-gray-500 text-center py-8">暂无照片</div>
           )}
         </div>
       </div>

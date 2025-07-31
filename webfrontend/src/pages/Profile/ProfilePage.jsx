@@ -258,74 +258,89 @@ function ProfilePage() {
         </form>
       )}
       
-      {/* 照片墙 */}
-      <div className="mt-10">
-        <div className="font-semibold text-lg text-gray-800 mb-3">照片墙</div>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          ref={photoInputRef}
-          className="hidden"
-          onChange={e => {
-            const files = Array.from(e.target.files).slice(0, MAX_PHOTOS - photos.length);
-            if (files.length) {
-              Promise.all(files.map(file => {
-                return new Promise(resolve => {
-                  const reader = new FileReader();
-                  reader.onload = ev => resolve(ev.target.result);
-                  reader.readAsDataURL(file);
-                  // ===================== 后续可上传照片到后端或云存储 =====================
-                });
-              })).then(imgs => setPhotos(p => [...p, ...imgs].slice(0, MAX_PHOTOS)));
-            }
-            e.target.value = '';
-          }}
-          disabled={visitorMode}
-        />
-        <div className="grid grid-cols-3 gap-4 min-h-[120px]">
-          {photos.map((src, idx) => (
-            <div key={idx} className="relative rounded-lg overflow-hidden shadow-md bg-white">
-              <img src={src} alt={`user-photo-${idx}`} className="w-full h-[110px] object-cover block" />
-              {!visitorMode && (
-                <button
-                  type="button"
-                  onClick={() => setPhotos(p => p.filter((_, i) => i !== idx))}
-                  className="absolute top-1.5 right-1.5 bg-black/55 text-white border-none rounded-full w-6 h-6 cursor-pointer font-bold text-lg leading-6 text-center p-0 hover:bg-black/70 transition-colors"
-                  title="删除"
-                >×</button>
-              )}
-            </div>
-          ))}
-          {/* 田字加号上传框 */}
-          {!visitorMode && photos.length < MAX_PHOTOS && (
-            <div
-              className="h-[110px] bg-white rounded-lg border-[2.5px] border-dashed border-gray-300 flex items-center justify-center cursor-pointer relative shadow-md hover:border-gray-400 transition-colors"
-              onClick={() => photoInputRef.current.click()}
-              title="上传照片"
+      {/* 照片墙 - 只在编辑模式下显示 */}
+      {!visitorMode && (
+        <div className="mt-10">
+          <div className="font-semibold text-lg text-gray-800 mb-3">照片墙</div>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            ref={photoInputRef}
+            className="hidden"
+            onChange={e => {
+              const files = Array.from(e.target.files).slice(0, MAX_PHOTOS - photos.length);
+              if (files.length) {
+                Promise.all(files.map(file => {
+                  return new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = ev => resolve(ev.target.result);
+                    reader.readAsDataURL(file);
+                    // ===================== 后续可上传照片到后端或云存储 =====================
+                  });
+                })).then(imgs => setPhotos(p => [...p, ...imgs].slice(0, MAX_PHOTOS)));
+              }
+              e.target.value = '';
+            }}
+            disabled={visitorMode}
+          />
+          <div className="grid grid-cols-3 gap-4 min-h-[120px]">
+            {photos.map((src, idx) => (
+              <div key={idx} className="relative rounded-lg overflow-hidden shadow-md bg-white">
+                <img src={src} alt={`user-photo-${idx}`} className="w-full h-[110px] object-cover block" />
+                {!visitorMode && (
+                  <button
+                    type="button"
+                    onClick={() => setPhotos(p => p.filter((_, i) => i !== idx))}
+                    className="absolute top-1.5 right-1.5 bg-black/55 text-white border-none rounded-full w-6 h-6 cursor-pointer font-bold text-lg leading-6 text-center p-0 hover:bg-black/70 transition-colors"
+                    title="删除"
+                  >×</button>
+                )}
+              </div>
+            ))}
+            {/* 田字加号上传框 */}
+            {!visitorMode && photos.length < MAX_PHOTOS && (
+              <div
+                className="h-[110px] bg-white rounded-lg border-[2.5px] border-dashed border-gray-300 flex items-center justify-center cursor-pointer relative shadow-md hover:border-gray-400 transition-colors"
+                onClick={() => photoInputRef.current.click()}
+                title="上传照片"
+              >
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="17" y="7" width="4" height="24" rx="2" fill="#d1d5db" />
+                  <rect x="7" y="17" width="24" height="4" rx="2" fill="#d1d5db" />
+                </svg>
+              </div>
+            )}
+            {/* 占位格子，保持布局美观 */}
+            {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length - (visitorMode ? 0 : 1)) }).map((_, i) => (
+              <div key={`ph-empty-${i}`} className="h-[110px]" />
+            ))}
+          </div>
+          {/* 预览/编辑切换按钮 */}
+          <div className="mt-4.5 text-right">
+            <button
+              type="button"
+              onClick={() => setVisitorMode(v => !v)}
+              className="bg-gray-200 text-gray-700 border-none rounded-md py-1.5 px-4.5 font-medium text-[15px] cursor-pointer shadow-sm hover:bg-gray-300 transition-colors"
             >
-              <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="17" y="7" width="4" height="24" rx="2" fill="#d1d5db" />
-                <rect x="7" y="17" width="24" height="4" rx="2" fill="#d1d5db" />
-              </svg>
-            </div>
-          )}
-          {/* 占位格子，保持布局美观 */}
-          {Array.from({ length: Math.max(0, MAX_PHOTOS - photos.length - (visitorMode ? 0 : 1)) }).map((_, i) => (
-            <div key={`ph-empty-${i}`} className="h-[110px]" />
-          ))}
+              {visitorMode ? '编辑资料' : '回到预览'}
+            </button>
+          </div>
         </div>
-        {/* 预览/编辑切换按钮 */}
-        <div className="mt-4.5 text-right">
+      )}
+
+      {/* 预览模式下的编辑按钮 */}
+      {visitorMode && (
+        <div className="mt-8 text-center">
           <button
             type="button"
-            onClick={() => setVisitorMode(v => !v)}
-            className="bg-gray-200 text-gray-700 border-none rounded-md py-1.5 px-4.5 font-medium text-[15px] cursor-pointer shadow-sm hover:bg-gray-300 transition-colors"
+            onClick={() => setVisitorMode(false)}
+            className="bg-indigo-500 text-white border-none rounded-lg py-3 px-8 font-semibold text-lg cursor-pointer shadow-md hover:bg-indigo-600 transition-colors"
           >
-            {visitorMode ? '编辑资料' : '预览'}
+            编辑资料
           </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
