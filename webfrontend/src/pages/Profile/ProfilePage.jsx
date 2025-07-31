@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import ProfilePreview from './ProfilePreview';
-import { getProfileApi, updateProfileApi } from '../../api/profile';
+import { getProfileApi, updateProfileApi, uploadPhotosApi, uploadAvatarApi, deletePhotoApi } from '../../api/profile';
 
 function ProfilePage() {
   const [profile, setProfile] = useState({
@@ -40,6 +40,8 @@ function ProfilePage() {
             height: userData.height || '',
             weight: userData.weight || '',
           });
+          // 设置照片墙数据
+          setPhotos(userData.photos || []);
         }
       } catch (error) {
         console.error('加载用户资料失败:', error);
@@ -101,13 +103,26 @@ function ProfilePage() {
               accept="image/*"
               className="hidden"
               ref={fileInputRef}
-              onChange={e => {
+              onChange={async e => {
                 const file = e.target.files[0];
                 if (file) {
-                  const reader = new FileReader();
-                  reader.onload = ev => setProfile(p => ({ ...p, avatar: ev.target.result }));
-                  reader.readAsDataURL(file);
-                  // ===================== 后续可上传头像到后端或云存储 =====================
+                  try {
+                    setLoading(true);
+                    setEditMsg('头像上传中...');
+                    
+                    // 调用后端API上传头像
+                    const response = await uploadAvatarApi(file);
+                    if (response.success) {
+                      // 更新前端状态
+                      setProfile(p => ({ ...p, avatar: response.data.avatar }));
+                      setEditMsg('头像上传成功！');
+                    }
+                  } catch (error) {
+                    console.error('头像上传失败:', error);
+                    setEditMsg('头像上传失败: ' + error.message);
+                  } finally {
+                    setLoading(false);
+                  }
                 }
               }}
             />
@@ -268,17 +283,29 @@ function ProfilePage() {
             multiple
             ref={photoInputRef}
             className="hidden"
-            onChange={e => {
+            onChange={async e => {
               const files = Array.from(e.target.files).slice(0, MAX_PHOTOS - photos.length);
               if (files.length) {
-                Promise.all(files.map(file => {
-                  return new Promise(resolve => {
-                    const reader = new FileReader();
-                    reader.onload = ev => resolve(ev.target.result);
-                    reader.readAsDataURL(file);
-                    // ===================== 后续可上传照片到后端或云存储 =====================
-                  });
-                })).then(imgs => setPhotos(p => [...p, ...imgs].slice(0, MAX_PHOTOS)));
+                try {
+                  setLoading(true);
+                  setEditMsg('照片上传中...');
+                  
+                  // 调用后端API上传照片
+                  const response = await uploadPhotosApi(files);
+                  if (response.success) {
+                    // 重新获取用户资料以更新照片墙
+                    const profileResponse = await getProfileApi();
+                    if (profileResponse.success && profileResponse.data) {
+                      setPhotos(profileResponse.data.photos || []);
+                    }
+                    setEditMsg('照片上传成功！');
+                  }
+                } catch (error) {
+                  console.error('照片上传失败:', error);
+                  setEditMsg('照片上传失败: ' + error.message);
+                } finally {
+                  setLoading(false);
+                }
               }
               e.target.value = '';
             }}
@@ -291,7 +318,28 @@ function ProfilePage() {
                 {!visitorMode && (
                   <button
                     type="button"
-                    onClick={() => setPhotos(p => p.filter((_, i) => i !== idx))}
+                    onClick={async () => {
+                      try {
+                        setLoading(true);
+                        setEditMsg('删除照片中...');
+                        
+                        // 调用后端API删除照片
+                        const response = await deletePhotoApi(idx);
+                        if (response.success) {
+                          // 重新获取用户资料以更新照片墙
+                          const profileResponse = await getProfileApi();
+                          if (profileResponse.success && profileResponse.data) {
+                            setPhotos(profileResponse.data.photos || []);
+                          }
+                          setEditMsg('照片删除成功！');
+                        }
+                      } catch (error) {
+                        console.error('照片删除失败:', error);
+                        setEditMsg('照片删除失败: ' + error.message);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
                     className="absolute top-1.5 right-1.5 bg-black/55 text-white border-none rounded-full w-6 h-6 cursor-pointer font-bold text-lg leading-6 text-center p-0 hover:bg-black/70 transition-colors"
                     title="删除"
                   >×</button>

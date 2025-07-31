@@ -30,4 +30,19 @@ export default {
     secret: 'your-super-secret-jwt-key-2024', // JWT 密钥，生产环境请使用更复杂的密钥
     expiresIn: '7d', // token 过期时间，7天
   },
+  // 文件上传配置
+  upload: {
+    mode: 'file',
+    fileSize: '10mb',
+    whitelist: ['.jpg', '.jpeg', '.png', '.gif'],
+  },
+  // 静态文件配置
+  staticFile: {
+    dirs: {
+      default: {
+        prefix: '/uploads/',
+        dir: 'uploads',
+      },
+    },
+  },
 } as MidwayConfig;

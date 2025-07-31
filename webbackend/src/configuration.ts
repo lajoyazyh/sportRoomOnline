@@ -5,6 +5,8 @@ import * as info from '@midwayjs/info';
 import * as swagger from '@midwayjs/swagger';
 import * as orm from '@midwayjs/typeorm';
 import * as jwt from '@midwayjs/jwt';
+import * as upload from '@midwayjs/upload';
+import * as staticFile from '@midwayjs/static-file';
 import * as cors from '@koa/cors';
 import { join } from 'path';
 // import { DefaultErrorFilter } from './filter/default.filter';
@@ -18,6 +20,8 @@ import { ReportMiddleware } from './middleware/report.middleware';
     swagger,
     validate,
     jwt,
+    upload,
+    staticFile,
     {
       component: info,
       enabledEnvironment: ['local'],

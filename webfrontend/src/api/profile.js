@@ -48,13 +48,26 @@ export async function updateProfileApi(profile) {
 export async function uploadAvatarApi(file) {
   const formData = new FormData();
   formData.append('avatar', file);
-  const res = await fetch(`${API_BASE}/profile/avatar`, {
+  
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/upload-avatar`, {
     method: 'POST',
-    credentials: 'include',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
     body: formData,
   });
-  if (!res.ok) throw new Error('上传头像失败');
-  return res.json();
+  
+  if (!res.ok) {
+    throw new Error('头像上传失败');
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '头像上传失败');
+  }
+  
+  return data;
 }
 
 // 上传照片
@@ -68,4 +81,56 @@ export async function uploadPhotoApi(file) {
   });
   if (!res.ok) throw new Error('上传照片失败');
   return res.json();
+}
+
+// 批量上传照片到照片墙
+export async function uploadPhotosApi(files) {
+  const formData = new FormData();
+  files.forEach(file => {
+    formData.append('photos', file);
+  });
+  
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/upload-photos`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: formData,
+  });
+  
+  if (!res.ok) {
+    throw new Error('照片上传失败');
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '照片上传失败');
+  }
+  
+  return data;
+}
+
+// 删除照片墙中的照片
+export async function deletePhotoApi(photoIndex) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/delete-photo`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ photoIndex }),
+  });
+  
+  if (!res.ok) {
+    throw new Error('删除照片失败');
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '删除照片失败');
+  }
+  
+  return data;
 }
