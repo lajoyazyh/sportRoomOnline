@@ -20,7 +20,7 @@ function ProfilePage() {
   const photoInputRef = useRef();
   const MAX_PHOTOS = 6;
   const [visitorMode, setVisitorMode] = useState(true); // 默认显示预览模式
-  const [likeCount] = useState(123); // 示例点赞数，可后续对接后端
+  // const [likeCount] = useState(123); // 示例点赞数，可后续对接后端
 
   // 组件加载时获取用户资料
   useEffect(() => {
@@ -60,7 +60,7 @@ function ProfilePage() {
         {visitorMode ? '个人资料' : '编辑资料'}
       </h2>
       {visitorMode ? (
-        <ProfilePreview profile={profile} photos={photos} likeCount={likeCount} />
+        <ProfilePreview profile={profile} photos={photos}  />
       ) : (
         <form
           onSubmit={async (e) => {

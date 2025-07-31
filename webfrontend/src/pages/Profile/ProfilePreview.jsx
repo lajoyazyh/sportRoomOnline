@@ -15,7 +15,7 @@ function ProfilePreview({ profile, photos, likeCount }) {
         {/* 点赞数及大拇指图标预留位 */}
         <div className="mt-3.5 flex items-center justify-center gap-1.5">
           {/* ===================== TODO: 在此处插入大拇指图片（如/thumb-up.svg） ===================== */}
-          <span className="text-lg text-gray-600">👍 {likeCount}</span>
+          <span className="text-lg text-gray-600"> {likeCount}</span>
         </div>
       </div>
 
