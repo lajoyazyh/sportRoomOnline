@@ -11,6 +11,13 @@ import * as fs from 'fs';
 export class UserService {
   @InjectEntityModel(User)
   userModel: Repository<User>;
+  // Repository提供的常用方法：
+  // - find(): 查询多条记录
+  // - findOne(): 查询单条记录
+  // - save(): 保存记录
+  // - update(): 更新记录
+  // - delete(): 删除记录
+  // - create(): 创建实体对象
 
   @Inject()
   jwtService: JwtService;
