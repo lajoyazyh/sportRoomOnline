@@ -11,66 +11,25 @@ const navs = [
 function HomePage({ onLogout }) {
   return (
     <div>
-      <nav style={{
-        display: 'flex',
-        alignItems: 'center',
-        background: '#222',
-        color: '#fff',
-        padding: '0.5rem 2rem',
-        marginBottom: 24,
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        zIndex: 1000,
-        boxSizing: 'border-box',
-      }}>
-        <div style={{ fontWeight: 'bold', fontSize: 20, marginRight: 32 }}>LOGO</div>
+      <nav className="flex items-center bg-gray-800 text-white py-2 px-8 mb-6 fixed top-0 left-0 w-full z-[1000] box-border">
+        <div className="font-bold text-xl mr-8">LOGO</div>
         {navs.map((item) => (
           <Link
             key={item.key}
             to={item.path}
-            style={{
-              background: 'transparent',
-              color: '#ccc',
-              textDecoration: 'none',
-              border: 'none',
-              padding: '8px 18px',
-              marginRight: 8,
-              borderRadius: 6,
-              fontWeight: 500,
-              cursor: 'pointer',
-              fontSize: 16,
-              transition: 'background 0.2s',
-              '&.active': {
-                background: '#646cff',
-                color: '#fff'
-              }
-            }}
+            className="bg-transparent text-gray-300 no-underline border-none py-2 px-[18px] mr-2 rounded-md font-medium cursor-pointer text-base transition-colors duration-200 hover:bg-[#646cff] hover:text-white"
           >
             {item.label}
           </Link>
         ))}
         <button
           onClick={onLogout}
-          style={{
-            marginLeft: 'auto',
-            marginRight: '2rem',
-            background: '#ff4d4f',
-            color: '#fff',
-            border: 'none',
-            padding: '8px 18px',
-            borderRadius: 6,
-            fontWeight: 500,
-            cursor: 'pointer',
-            fontSize: 16,
-            transition: 'background 0.2s',
-          }}
+          className="ml-auto mr-8 bg-red-500 text-white border-none py-2 px-[18px] rounded-md font-medium cursor-pointer text-base transition-colors duration-200 hover:bg-red-600"
         >
           退出登录
         </button>
       </nav>
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: 24, paddingTop: 80 }}>
+      <div className="max-w-[900px] mx-auto p-6 pt-20">
         <Outlet />
       </div>
     </div>

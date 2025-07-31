@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import ProfilePreview from './ProfilePreview';
-import './profile-page.css';
 
 function ProfilePage() {
   const [profile, setProfile] = useState({
@@ -22,13 +21,8 @@ function ProfilePage() {
   const [likeCount] = useState(123); // 示例点赞数，可后续对接后端
 
   return (
-    <div style={{
-      maxWidth: 520,
-      margin: '0 auto',
-      padding: '40px 40px 32px 40px',
-      position: 'relative',
-    }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 32, fontWeight: 700, fontSize: 28, color: '#222' }}>个人信息</h2>
+    <div className="max-w-[520px] mx-auto py-10 px-10 pb-8 relative">
+      <h2 className="text-center mb-8 font-bold text-[28px] text-gray-800">个人信息</h2>
       {visitorMode ? (
         <ProfilePreview profile={profile} photos={photos} likeCount={likeCount} />
       ) : (

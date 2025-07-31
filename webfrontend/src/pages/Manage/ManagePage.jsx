@@ -3,30 +3,30 @@
 
 function ManagePage() {
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>活动管理</h2>
-      <div style={{ marginTop: '20px', display: 'flex', gap: '20px' }}>
-        <div style={{ flex: 1, background: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', padding: '16px' }}>
-          <h3>我的活动</h3>
-          <div style={{ marginTop: '12px' }}>
-            <div style={{ padding: '12px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>活动名称</span>
+    <div className="p-5">
+      <h2 className="text-2xl font-bold text-gray-800 mb-5">活动管理</h2>
+      <div className="mt-5 flex gap-5">
+        <div className="flex-1 bg-white rounded-lg shadow-md p-4">
+          <h3 className="text-xl font-semibold text-gray-700 mb-3">我的活动</h3>
+          <div className="mt-3">
+            <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+              <span className="text-gray-600">活动名称</span>
               <div>
-                <button style={{ marginRight: '8px', padding: '4px 8px', background: '#646cff', color: 'white', border: 'none', borderRadius: '4px' }}>编辑</button>
-                <button style={{ padding: '4px 8px', background: '#ff4d4f', color: 'white', border: 'none', borderRadius: '4px' }}>删除</button>
+                <button className="mr-2 px-2 py-1 bg-[#646cff] text-white border-none rounded cursor-pointer text-sm hover:bg-[#5a5ad4] transition-colors duration-200">编辑</button>
+                <button className="px-2 py-1 bg-red-500 text-white border-none rounded cursor-pointer text-sm hover:bg-red-600 transition-colors duration-200">删除</button>
               </div>
             </div>
-            <div style={{ padding: '12px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>即将开始的活动</span>
+            <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+              <span className="text-gray-600">即将开始的活动</span>
               <div>
-                <button style={{ marginRight: '8px', padding: '4px 8px', background: '#646cff', color: 'white', border: 'none', borderRadius: '4px' }}>编辑</button>
-                <button style={{ padding: '4px 8px', background: '#ff4d4f', color: 'white', border: 'none', borderRadius: '4px' }}>删除</button>
+                <button className="mr-2 px-2 py-1 bg-[#646cff] text-white border-none rounded cursor-pointer text-sm hover:bg-[#5a5ad4] transition-colors duration-200">编辑</button>
+                <button className="px-2 py-1 bg-red-500 text-white border-none rounded cursor-pointer text-sm hover:bg-red-600 transition-colors duration-200">删除</button>
               </div>
             </div>
           </div>
         </div>
-        <div style={{ flex: '0 0 200px' }}>
-          <button style={{ width: '100%', padding: '10px', background: '#646cff', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '16px' }}>
+        <div className="flex-none w-[200px]">
+          <button className="w-full py-[10px] px-4 bg-[#646cff] text-white border-none rounded-md cursor-pointer text-base hover:bg-[#5a5ad4] transition-colors duration-200">
             创建新活动
           </button>
         </div>
