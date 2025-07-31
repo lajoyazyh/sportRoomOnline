@@ -5,6 +5,7 @@ import * as info from '@midwayjs/info';
 import * as swagger from '@midwayjs/swagger';
 import * as orm from '@midwayjs/typeorm';
 import * as jwt from '@midwayjs/jwt';
+import * as cors from '@koa/cors';
 import { join } from 'path';
 // import { DefaultErrorFilter } from './filter/default.filter';
 // import { NotFoundFilter } from './filter/notfound.filter';
@@ -29,6 +30,21 @@ export class MainConfiguration {
   app: koa.Application;
 
   async onReady() {
+    // add cors middleware
+    this.app.use(
+      cors({
+        origin: 'http://localhost:5173', // 前端地址
+        credentials: true,
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowHeaders: [
+          'Content-Type',
+          'Authorization',
+          'Accept',
+          'X-Requested-With',
+        ],
+      })
+    );
+
     // add middleware
     this.app.useMiddleware([ReportMiddleware]);
     // add filter

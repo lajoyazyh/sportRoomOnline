@@ -7,6 +7,13 @@ export default {
   koa: {
     port: 7001,
   },
+  // CORS 配置
+  cors: {
+    origin: 'http://localhost:5173', // 允许前端域名
+    credentials: true, // 允许携带cookie
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  },
   typeorm: {
     dataSource: {
       default: {
