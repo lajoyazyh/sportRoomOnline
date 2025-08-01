@@ -42,10 +42,24 @@ function CreateActivityPage() {
   // 处理表单输入变化
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? (value === '' ? '' : Number(value)) : value
-    }));
+    
+    if (name === 'fee') {
+      // 特殊处理费用字段，避免浮点数精度问题
+      if (value === '') {
+        setFormData(prev => ({ ...prev, [name]: 0 }));
+      } else {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue) && numValue >= 0) {
+          // 使用 Math.round 避免浮点数精度问题
+          setFormData(prev => ({ ...prev, [name]: Math.round(numValue * 100) / 100 }));
+        }
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'number' ? (value === '' ? '' : Number(value)) : value
+      }));
+    }
   };
 
   // 处理图片上传
@@ -330,10 +344,11 @@ function CreateActivityPage() {
             <input
               type="number"
               name="fee"
-              value={formData.fee}
+              value={formData.fee === 0 ? '' : formData.fee}
               onChange={handleInputChange}
               min="0"
               step="0.01"
+              placeholder="0"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

@@ -8,6 +8,7 @@ import SquarePage from './pages/Square/SquarePage';
 import ManagePage from './pages/Manage/ManagePage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import CreateActivityPage from './pages/CreateActivity/CreateActivityPage';
+import EditActivityPage from './pages/Activity/EditActivityPage';
 import ActivityDetailPage from './pages/ActivityDetail/ActivityDetailPage';
 import { getProfileApi } from './api/profile';
 
@@ -81,6 +82,7 @@ function App() {
       
       {/* 活动相关路由 */}
       <Route path="/activity/create" element={user ? <CreateActivityPage /> : <Navigate to="/login" />} />
+      <Route path="/activity/edit/:id" element={user ? <EditActivityPage /> : <Navigate to="/login" />} />
       <Route path="/activity/:id" element={user ? <ActivityDetailPage /> : <Navigate to="/login" />} />
       
       {/* 重定向规则 */}

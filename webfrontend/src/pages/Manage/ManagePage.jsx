@@ -27,7 +27,7 @@ function ManagePage() {
 
       if (response.ok) {
         const data = await response.json();
-        setMyActivities(data.data || []);
+        setMyActivities(data.data?.list || []);
       } else {
         console.error('获取我的活动失败');
       }
