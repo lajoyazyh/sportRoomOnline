@@ -13,8 +13,31 @@ function CreateActivityPage() {
     title: '',
     description: '',
     type: 'fitness',
-    location: '',
-    startTime: '',
+    location: '',        {/* 提交按钮 */}
+        <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            onClick={(e) => handleSubmit(e, true)}
+            disabled={loading}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? '保存中...' : '保存草稿'}
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? '发布中...' : '发布活动'}
+          </button>
+        </div>'',
     endTime: '',
     registrationDeadline: '',
     minParticipants: 1,
@@ -145,10 +168,11 @@ function CreateActivityPage() {
   };
 
   // 提交表单
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, asDraft = false) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    // 如果是保存草稿，跳过部分验证
+    if (!asDraft && !validateForm()) {
       return;
     }
 
@@ -157,7 +181,8 @@ function CreateActivityPage() {
       const token = localStorage.getItem('token');
       const submitData = {
         ...formData,
-        images: JSON.stringify(images)
+        images: JSON.stringify(images),
+        status: asDraft ? 'draft' : 'published'
       };
 
       const response = await fetch(`${API_BASE_URL}/api/activity/create`, {
@@ -171,14 +196,14 @@ function CreateActivityPage() {
 
       if (response.ok) {
         const result = await response.json();
-        alert('活动创建成功！');
-        navigate(`/activity/${result.data.id}`);
+        alert(asDraft ? '草稿保存成功！' : '活动创建成功！');
+        navigate(asDraft ? '/home/manage' : `/activity/${result.data.id}`);
       } else {
         const error = await response.json();
-        alert(error.message || '创建失败，请稍后重试');
+        alert(error.message || '操作失败，请稍后重试');
       }
     } catch (error) {
-      console.error('创建活动失败:', error);
+      console.error('操作失败:', error);
       alert('网络错误，请稍后重试');
     } finally {
       setLoading(false);

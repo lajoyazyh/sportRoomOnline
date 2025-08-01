@@ -97,6 +97,38 @@ function ManagePage() {
     }
   };
 
+  // 发布活动
+  const handlePublishActivity = async (activityId) => {
+    if (!confirm('确定要发布这个活动吗？发布后其他用户就可以看到并报名了。')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/activity/${activityId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'published'
+        }),
+      });
+
+      if (response.ok) {
+        alert('活动发布成功！');
+        fetchMyActivities(); // 重新获取列表
+      } else {
+        const result = await response.json();
+        alert(result.message || '发布失败，请稍后重试');
+      }
+    } catch (error) {
+      console.error('发布活动失败:', error);
+      alert('发布失败，网络错误');
+    }
+  };
+
   // 格式化时间
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('zh-CN');
@@ -248,18 +280,30 @@ function ManagePage() {
                               >
                                 查看
                               </Link>
-                              <Link
-                                to={`/activity/edit/${activity.id}`}
-                                className="text-green-600 hover:text-green-900 no-underline"
-                              >
-                                编辑
-                              </Link>
-                              <button
-                                onClick={() => handleDeleteActivity(activity.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                删除
-                              </button>
+                              {activity.status !== 'completed' && activity.status !== 'cancelled' && (
+                                <Link
+                                  to={`/activity/edit/${activity.id}`}
+                                  className="text-green-600 hover:text-green-900 no-underline"
+                                >
+                                  编辑
+                                </Link>
+                              )}
+                              {activity.status === 'draft' && (
+                                <button
+                                  onClick={() => handlePublishActivity(activity.id)}
+                                  className="text-purple-600 hover:text-purple-900"
+                                >
+                                  发布
+                                </button>
+                              )}
+                              {activity.currentParticipants === 0 && (
+                                <button
+                                  onClick={() => handleDeleteActivity(activity.id)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  删除
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))}
