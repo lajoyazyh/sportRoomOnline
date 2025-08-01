@@ -18,7 +18,7 @@ function ManagePage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/activity/my`, {
+      const response = await fetch(`${API_BASE_URL}/api/activity/my/activities`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

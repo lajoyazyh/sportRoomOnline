@@ -118,9 +118,10 @@ export class ActivityQueryDTO {
   @Rule(
     RuleType.string()
       .optional()
-      .valid(...Object.values(ActivityStatus))
+      .allow('')
+      .valid('', ...Object.values(ActivityStatus))
   )
-  status?: ActivityStatus;
+  status?: ActivityStatus | '';
 
   @Rule(RuleType.number().integer().min(1).default(1))
   page?: number;

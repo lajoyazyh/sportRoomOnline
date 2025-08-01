@@ -59,7 +59,7 @@ export class ActivityService {
       const {
         search,
         type,
-        status, // 移除默认值，允许显示所有状态
+        status,
         page = 1,
         pageSize = 10,
         sortBy = 'createdAt',
@@ -106,10 +106,12 @@ export class ActivityService {
         queryBuilder.andWhere('activity.type = :type', { type });
       }
 
-      // 状态筛选
-      if (status) {
+      // 状态筛选逻辑
+      if (status !== undefined && status !== '') {
+        // 传递了具体的状态值，按该状态筛选
         queryBuilder.andWhere('activity.status = :status', { status });
       }
+      // 如果没有传status参数或status为空字符串，则显示所有状态的活动（不添加筛选条件）
 
       // 排序
       const sortField =

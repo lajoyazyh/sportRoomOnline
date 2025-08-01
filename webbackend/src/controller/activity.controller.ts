@@ -44,12 +44,19 @@ export class ActivityController {
 
       const token = authHeader.substring(7);
       const payload = await this.userService.validateToken(token);
+      console.log('🔍 [createActivity] 创建者ID:', payload.userid);
 
       const activity = await this.activityService.createActivity(
         activityData,
         payload.userid
       );
 
+      console.log(
+        '🔍 [createActivity] 已创建活动ID:',
+        activity.id,
+        '创建者ID:',
+        activity.creatorId
+      );
       return {
         success: true,
         message: '活动创建成功',
@@ -210,10 +217,17 @@ export class ActivityController {
 
       const token = authHeader.substring(7);
       const payload = await this.userService.validateToken(token);
+      console.log('🔍 [getMyActivities] 用户ID:', payload.userid);
 
       const result = await this.activityService.getMyActivities(
         payload.userid,
         query
+      );
+
+      console.log(
+        '🔍 [getMyActivities] 查询结果:',
+        result.list.length,
+        '个活动'
       );
 
       return {

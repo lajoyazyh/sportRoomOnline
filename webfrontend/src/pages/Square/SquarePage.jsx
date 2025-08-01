@@ -33,9 +33,11 @@ function SquarePage() {
   // 活动状态选项
   const activityStatuses = [
     { value: '', label: '全部状态' },
+    { value: 'draft', label: '草稿' },
     { value: 'published', label: '已发布' },
     { value: 'ongoing', label: '进行中' },
-    { value: 'completed', label: '已完成' }
+    { value: 'completed', label: '已完成' },
+    { value: 'cancelled', label: '已取消' }
   ];
 
   // 获取活动列表
@@ -49,8 +51,7 @@ function SquarePage() {
       
       if (searchTerm) params.append('search', searchTerm);
       if (filterType) params.append('type', filterType);
-      // 临时移除状态筛选，显示所有状态的活动
-      // if (filterStatus) params.append('status', filterStatus);
+      if (filterStatus) params.append('status', filterStatus);
 
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}/api/activity/list?${params}`, {
@@ -72,7 +73,7 @@ function SquarePage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, filterType]); // 临时移除filterStatus依赖
+  }, [currentPage, searchTerm, filterType, filterStatus]);
 
   useEffect(() => {
     fetchActivities();
