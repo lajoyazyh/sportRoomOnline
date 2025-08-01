@@ -13,31 +13,8 @@ function CreateActivityPage() {
     title: '',
     description: '',
     type: 'fitness',
-    location: '',        {/* 提交按钮 */}
-        <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={(e) => handleSubmit(e, true)}
-            disabled={loading}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? '保存中...' : '保存草稿'}
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? '发布中...' : '发布活动'}
-          </button>
-        </div>'',
+    location: '',
+    startTime: '',
     endTime: '',
     registrationDeadline: '',
     minParticipants: 1,
@@ -465,11 +442,19 @@ function CreateActivityPage() {
             取消
           </button>
           <button
+            type="button"
+            onClick={(e) => handleSubmit(e, true)}
+            disabled={loading}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? '保存中...' : '保存草稿'}
+          </button>
+          <button
             type="submit"
             disabled={loading}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? '创建中...' : '创建活动'}
+            {loading ? '发布中...' : '发布活动'}
           </button>
         </div>
       </form>
