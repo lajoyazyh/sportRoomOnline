@@ -47,6 +47,13 @@ export class CreateActivityDTO {
 
   @Rule(RuleType.string().optional().allow(''))
   images?: string;
+
+  @Rule(
+    RuleType.string()
+      .optional()
+      .valid(...Object.values(ActivityStatus))
+  )
+  status?: ActivityStatus;
 }
 
 export class UpdateActivityDTO {

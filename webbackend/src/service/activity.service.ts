@@ -41,7 +41,7 @@ export class ActivityService {
       const activity = this.activityModel.create({
         ...activityData,
         creatorId,
-        status: ActivityStatus.PUBLISHED,
+        status: activityData.status || ActivityStatus.PUBLISHED,
         currentParticipants: 0,
         viewCount: 0,
         likeCount: 0,

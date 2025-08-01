@@ -40,9 +40,12 @@ function ManagePage() {
 
   // 获取我参与的活动
   const fetchJoinedActivities = async () => {
+    console.log('开始获取我参与的活动...');
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      console.log('Token:', token ? '存在' : '不存在');
+      
       const response = await fetch(`${API_BASE_URL}/api/registration/my`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -50,18 +53,27 @@ function ManagePage() {
         },
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (response.ok) {
         const data = await response.json();
-        setJoinedActivities(data.data || []);
+        console.log('Response data:', data);
+        setJoinedActivities(data.data?.list || []);
       } else {
-        console.error('获取我参与的活动失败');
+        const errorData = await response.json().catch(() => null);
+        console.error('获取我参与的活动失败，状态码:', response.status);
+        console.error('错误信息:', errorData);
       }
     } catch (error) {
       console.error('网络错误:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log('useEffect 触发，当前 activeTab:', activeTab);
     if (activeTab === 'created') {
       fetchMyActivities();
     } else {
@@ -181,7 +193,10 @@ function ManagePage() {
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
             <button
-              onClick={() => setActiveTab('created')}
+              onClick={() => {
+                console.log('点击"我创建的活动"标签');
+                setActiveTab('created');
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'created'
                   ? 'border-blue-500 text-blue-600'
@@ -191,7 +206,10 @@ function ManagePage() {
               我创建的活动 ({myActivities.length})
             </button>
             <button
-              onClick={() => setActiveTab('joined')}
+              onClick={() => {
+                console.log('点击"我参与的活动"标签');
+                setActiveTab('joined');
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'joined'
                   ? 'border-blue-500 text-blue-600'

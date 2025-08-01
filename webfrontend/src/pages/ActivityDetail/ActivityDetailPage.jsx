@@ -1,7 +1,7 @@
 // ActivityDetailPage.jsx
 // 活动详情页面 - 查看活动完整信息并支持报名
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:7001';
@@ -15,37 +15,37 @@ function ActivityDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // 获取活动详情
-  useEffect(() => {
-    const fetchActivity = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/api/activity/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+  const fetchActivity = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/activity/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          setActivity(data.data);
-        } else {
-          console.error('获取活动详情失败');
-          alert('活动不存在或已被删除');
-          navigate('/home/square');
-        }
-      } catch (error) {
-        console.error('网络错误:', error);
-        alert('网络错误，请稍后重试');
-      } finally {
-        setLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        setActivity(data.data);
+      } else {
+        console.error('获取活动详情失败');
+        alert('活动不存在或已被删除');
+        navigate('/home/square');
       }
-    };
+    } catch (error) {
+      console.error('网络错误:', error);
+      alert('网络错误，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, navigate]);
 
+  useEffect(() => {
     if (id) {
       fetchActivity();
     }
-  }, [id, navigate]);
+  }, [id, fetchActivity]);
 
   // 报名活动
   const handleRegister = async () => {
@@ -65,9 +65,14 @@ function ActivityDetailPage() {
       });
 
       if (response.ok) {
-        alert('报名成功！请等待活动创建者审核');
-        // 重新获取活动信息以更新报名人数
-        window.location.reload();
+        const result = await response.json();
+        if (result.success) {
+          alert('报名成功！');
+          // 重新获取活动信息以更新报名人数
+          await fetchActivity();
+        } else {
+          alert(result.message || '报名失败，请稍后重试');
+        }
       } else {
         const error = await response.json();
         alert(error.message || '报名失败，请稍后重试');
