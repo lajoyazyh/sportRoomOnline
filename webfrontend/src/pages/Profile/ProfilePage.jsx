@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import ProfilePreview from './ProfilePreview';
 import { getProfileApi, updateProfileApi, uploadPhotosApi, uploadAvatarApi, deletePhotoApi } from '../../api/profile';
 
 function ProfilePage() {
-  const navigate = useNavigate();
   const [profile, setProfile] = useState({
     avatar: '', // base64
     nickname: '',
@@ -70,12 +68,6 @@ function ProfilePage() {
             }`}
           >
             个人资料
-          </button>
-          <button
-            onClick={() => navigate('/home/orders')}
-            className="px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            我的订单
           </button>
           <button
             onClick={() => setVisitorMode(false)}
@@ -398,29 +390,6 @@ function ProfilePage() {
               <div key={`ph-empty-${i}`} className="h-[110px]" />
             ))}
           </div>
-          {/* 预览/编辑切换按钮 */}
-          <div className="mt-4.5 text-right">
-            <button
-              type="button"
-              onClick={() => setVisitorMode(v => !v)}
-              className="bg-gray-200 text-gray-700 border-none rounded-md py-1.5 px-4.5 font-medium text-[15px] cursor-pointer shadow-sm hover:bg-gray-300 transition-colors"
-            >
-              {visitorMode ? '编辑资料' : '回到预览'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 预览模式下的编辑按钮 */}
-      {visitorMode && (
-        <div className="mt-8 text-center">
-          <button
-            type="button"
-            onClick={() => setVisitorMode(false)}
-            className="bg-indigo-500 text-white border-none rounded-lg py-3 px-8 font-semibold text-lg cursor-pointer shadow-md hover:bg-indigo-600 transition-colors"
-          >
-            编辑资料
-          </button>
         </div>
       )}
     </div>
