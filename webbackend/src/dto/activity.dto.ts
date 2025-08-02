@@ -52,6 +52,7 @@ export class CreateActivityDTO {
     RuleType.string()
       .optional()
       .valid(...Object.values(ActivityStatus))
+      .default(ActivityStatus.PUBLISHED)
   )
   status?: ActivityStatus;
 }

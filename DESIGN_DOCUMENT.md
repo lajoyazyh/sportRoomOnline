@@ -14,7 +14,7 @@
 ### 核心功能清单
 - ✅ **用户管理**: 注册、登录、个人信息管理、头像上传
 - ✅ **活动管理**: 创建、编辑、发布、取消体育活动
-- 🚧 **活动报名**: 在线报名、审核、状态管理
+- ✅ **活动报名**: 在线报名、审核、状态管理
 - 🚧 **订单支付**: 付费活动支付、订单管理、退款
 - ✅ **活动展示**: 列表浏览、详情查看、搜索筛选
 - 🚧 **社交互动**: 评论评分、活动分享
@@ -135,7 +135,7 @@ enum ActivityStatus {
 }
 ```
 
-#### 3. Registration (报名实体) - 🚧 待开发
+#### 3. Registration (报名实体) - ✅ 已完成
 ```typescript
 interface Registration {
   id: number;               // 报名ID
@@ -235,30 +235,31 @@ DELETE /api/activity/:id       - 删除活动
 GET    /api/activity/search    - 搜索活动
 ```
 
-### 第二阶段: 报名系统 - 🚧 待开发
+### 第二阶段: 报名系统 - ✅ 已完成
 **目标**: 实现用户报名和审核流程
 
 **后端任务**:
-- [ ] 创建Registration实体和数据表
-- [ ] 实现RegistrationService服务层
-- [ ] 实现报名审核逻辑
-- [ ] 添加报名通知功能
-- [ ] 实现报名人数限制
+- [x] 创建Registration实体和数据表
+- [x] 实现RegistrationService服务层
+- [x] 实现报名审核逻辑
+- [x] 添加报名状态管理
+- [x] 实现报名人数限制
 
 **前端任务**:
-- [ ] 设计报名表单组件
-- [ ] 实现我的报名页面
-- [ ] 设计活动管理页面
-- [ ] 实现报名审核界面
-- [ ] 添加报名状态展示
+- [x] 设计报名表单组件
+- [x] 实现我的报名页面
+- [x] 设计活动管理页面
+- [x] 实现报名审核界面
+- [x] 添加报名状态展示
+- [x] 限制已发布活动关键字段编辑
 
 **API接口设计**:
 ```
-POST   /api/registration/apply     - 申请报名
-GET    /api/registration/my        - 我的报名
-GET    /api/registration/manage    - 管理报名(活动创建者)
-PUT    /api/registration/:id       - 审核报名
-DELETE /api/registration/:id       - 取消报名
+POST   /api/registration/apply         - 申请报名
+GET    /api/registration/my            - 我的报名
+GET    /api/registration/activity/:id  - 管理报名(活动创建者)
+POST   /api/registration/review/:id    - 审核报名
+DELETE /api/registration/cancel/:id    - 取消报名
 ```
 
 ### 第三阶段: 支付订单系统 - 🚧 待开发

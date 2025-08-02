@@ -14,28 +14,37 @@ export class ActivityService {
   activityModel: Repository<Activity>;
 
   // 创建活动
-  async createActivity(activityData: CreateActivityDTO, creatorId: number) {
+  async createActivity(
+    activityData: CreateActivityDTO,
+    creatorId: number,
+    isDraft = false
+  ) {
     try {
-      // 验证时间逻辑
-      const now = new Date();
-      const startTime = new Date(activityData.startTime);
-      const endTime = new Date(activityData.endTime);
-      const registrationDeadline = new Date(activityData.registrationDeadline);
+      // 如果不是草稿状态，才进行严格的时间验证
+      if (!isDraft && activityData.status !== ActivityStatus.DRAFT) {
+        // 验证时间逻辑
+        const now = new Date();
+        const startTime = new Date(activityData.startTime);
+        const endTime = new Date(activityData.endTime);
+        const registrationDeadline = new Date(
+          activityData.registrationDeadline
+        );
 
-      if (startTime <= now) {
-        throw new Error('活动开始时间必须晚于当前时间');
-      }
+        if (startTime <= now) {
+          throw new Error('活动开始时间必须晚于当前时间');
+        }
 
-      if (endTime <= startTime) {
-        throw new Error('活动结束时间必须晚于开始时间');
-      }
+        if (endTime <= startTime) {
+          throw new Error('活动结束时间必须晚于开始时间');
+        }
 
-      if (registrationDeadline >= startTime) {
-        throw new Error('报名截止时间必须早于活动开始时间');
-      }
+        if (registrationDeadline >= startTime) {
+          throw new Error('报名截止时间必须早于活动开始时间');
+        }
 
-      if (activityData.minParticipants > activityData.maxParticipants) {
-        throw new Error('最少参与人数不能大于最多参与人数');
+        if (activityData.minParticipants > activityData.maxParticipants) {
+          throw new Error('最少参与人数不能大于最多参与人数');
+        }
       }
 
       const activity = this.activityModel.create({

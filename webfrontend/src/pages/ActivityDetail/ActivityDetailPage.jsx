@@ -67,7 +67,7 @@ function ActivityDetailPage() {
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          alert('报名成功！');
+          alert('报名提交成功！请等待活动创建者审核。');
           // 重新获取活动信息以更新报名人数
           await fetchActivity();
         } else {

@@ -1,6 +1,6 @@
 import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import {
   Registration,
   RegistrationStatus,
@@ -55,12 +55,16 @@ export class RegistrationService {
         where: {
           activityId: registrationData.activityId,
           userId,
-          status: RegistrationStatus.APPROVED,
+          status: In([RegistrationStatus.PENDING, RegistrationStatus.APPROVED]),
         },
       });
 
       if (existingRegistration) {
-        throw new Error('您已经报名了这个活动');
+        if (existingRegistration.status === RegistrationStatus.PENDING) {
+          throw new Error('您已经报名了这个活动，正在等待审核');
+        } else {
+          throw new Error('您已经报名了这个活动');
+        }
       }
 
       // 检查是否为活动创建者
@@ -77,15 +81,13 @@ export class RegistrationService {
       const registration = this.registrationModel.create({
         ...registrationData,
         userId,
-        status: RegistrationStatus.APPROVED,
+        status: RegistrationStatus.PENDING, // 设置为待审核状态
       });
 
       const savedRegistration = await this.registrationModel.save(registration);
 
-      // 更新活动参与人数
-      await this.activityModel.update(registrationData.activityId, {
-        currentParticipants: activity.currentParticipants + 1,
-      });
+      // 注意：只有审核通过后才更新活动参与人数
+      // 这里不再直接更新参与人数
 
       return savedRegistration;
     } catch (error) {
@@ -241,6 +243,66 @@ export class RegistrationService {
       };
     } catch (error) {
       throw new Error(`获取报名列表失败: ${error.message}`);
+    }
+  }
+
+  // 审核报名（通过或拒绝）
+  async reviewRegistration(
+    registrationId: number,
+    creatorId: number,
+    status: RegistrationStatus,
+    rejectReason?: string
+  ) {
+    try {
+      // 查找报名记录
+      const registration = await this.registrationModel.findOne({
+        where: { id: registrationId },
+        relations: ['activity'],
+      });
+
+      if (!registration) {
+        throw new Error('报名记录不存在');
+      }
+
+      // 验证权限
+      if (registration.activity.creatorId !== creatorId) {
+        throw new Error('只有活动创建者可以审核报名');
+      }
+
+      // 检查当前状态
+      if (registration.status !== RegistrationStatus.PENDING) {
+        throw new Error('只能审核待审核状态的报名');
+      }
+
+      // 如果是通过，检查人数限制
+      if (status === RegistrationStatus.APPROVED) {
+        const activity = registration.activity;
+        if (activity.currentParticipants >= activity.maxParticipants) {
+          throw new Error('活动人数已满，无法通过更多报名');
+        }
+
+        // 更新活动参与人数
+        await this.activityModel.update(registration.activityId, {
+          currentParticipants: activity.currentParticipants + 1,
+        });
+      }
+
+      // 更新报名状态
+      await this.registrationModel.update(registrationId, {
+        status,
+        rejectReason:
+          status === RegistrationStatus.REJECTED ? rejectReason : null,
+      });
+
+      return {
+        success: true,
+        message:
+          status === RegistrationStatus.APPROVED
+            ? '报名审核通过'
+            : '报名已拒绝',
+      };
+    } catch (error) {
+      throw new Error(`审核报名失败: ${error.message}`);
     }
   }
 
