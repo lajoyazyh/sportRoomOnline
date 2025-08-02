@@ -3,6 +3,10 @@ import { InjectEntityModel } from '@midwayjs/typeorm';
 import { Repository } from 'typeorm';
 import { Activity, ActivityStatus } from '../entity/activity.entity';
 import {
+  Registration,
+  RegistrationStatus,
+} from '../entity/registration.entity';
+import {
   CreateActivityDTO,
   UpdateActivityDTO,
   ActivityQueryDTO,
@@ -12,6 +16,9 @@ import {
 export class ActivityService {
   @InjectEntityModel(Activity)
   activityModel: Repository<Activity>;
+
+  @InjectEntityModel(Registration)
+  registrationModel: Repository<Registration>;
 
   // 创建活动
   async createActivity(
@@ -295,6 +302,24 @@ export class ActivityService {
       queryBuilder.skip(skip).take(pageSize);
 
       const [activities, total] = await queryBuilder.getManyAndCount();
+
+      // 重新计算每个活动的实际参与人数
+      for (const activity of activities) {
+        const actualParticipants = await this.registrationModel.count({
+          where: {
+            activityId: activity.id,
+            status: RegistrationStatus.APPROVED,
+          },
+        });
+
+        // 如果实际人数与记录的不一致，更新数据库
+        if (actualParticipants !== activity.currentParticipants) {
+          await this.activityModel.update(activity.id, {
+            currentParticipants: actualParticipants,
+          });
+          activity.currentParticipants = actualParticipants;
+        }
+      }
 
       return {
         list: activities,

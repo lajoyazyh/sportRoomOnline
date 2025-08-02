@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProfilePreview from './ProfilePreview';
 import { getProfileApi, updateProfileApi, uploadPhotosApi, uploadAvatarApi, deletePhotoApi } from '../../api/profile';
 
 function ProfilePage() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState({
     avatar: '', // base64
     nickname: '',
@@ -56,6 +58,38 @@ function ProfilePage() {
 
   return (
     <div className="max-w-[520px] mx-auto py-10 px-10 pb-8 relative">
+      {/* 导航菜单 */}
+      <div className="mb-6 flex justify-center">
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setVisitorMode(true)}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              visitorMode 
+                ? 'bg-white shadow-sm text-blue-600 font-medium' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            个人资料
+          </button>
+          <button
+            onClick={() => navigate('/home/orders')}
+            className="px-4 py-2 rounded-md text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            我的订单
+          </button>
+          <button
+            onClick={() => setVisitorMode(false)}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              !visitorMode 
+                ? 'bg-white shadow-sm text-blue-600 font-medium' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            编辑资料
+          </button>
+        </div>
+      </div>
+      
       <h2 className="text-center mb-8 font-bold text-[28px] text-gray-800">
         {visitorMode ? '个人资料' : '编辑资料'}
       </h2>

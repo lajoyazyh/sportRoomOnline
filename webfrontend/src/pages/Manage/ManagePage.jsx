@@ -65,11 +65,13 @@ function ManagePage() {
   };
 
   useEffect(() => {
-    if (activeTab === 'created') {
-      fetchMyActivities();
-    } else {
-      fetchJoinedActivities();
-    }
+    // if (activeTab === 'created') {
+    //   fetchMyActivities();
+    // } else {
+    //   fetchJoinedActivities();
+    // }
+    fetchMyActivities();
+    fetchJoinedActivities();
   }, [activeTab]);
 
   // 删除活动

@@ -11,6 +11,8 @@ import CreateActivityPage from './pages/CreateActivity/CreateActivityPage';
 import EditActivityPage from './pages/Activity/EditActivityPage';
 import ActivityDetailPage from './pages/ActivityDetail/ActivityDetailPage';
 import ActivityReviewPage from './pages/ActivityReview/ActivityReviewPage';
+import OrderListPage from './pages/Order/OrderListPage';
+import PaymentPage from './pages/Order/PaymentPage';
 import { getProfileApi } from './api/profile';
 
 function App() {
@@ -79,6 +81,7 @@ function App() {
         <Route path="square" element={<SquarePage />} />
         <Route path="manage" element={<ManagePage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="orders" element={<OrderListPage />} />
       </Route>
       
       {/* 活动相关路由 */}
@@ -86,6 +89,9 @@ function App() {
       <Route path="/activity/edit/:id" element={user ? <EditActivityPage /> : <Navigate to="/login" />} />
       <Route path="/activity/review/:id" element={user ? <ActivityReviewPage /> : <Navigate to="/login" />} />
       <Route path="/activity/:id" element={user ? <ActivityDetailPage /> : <Navigate to="/login" />} />
+      
+      {/* 支付相关路由 */}
+      <Route path="/order/pay/:orderId" element={user ? <PaymentPage /> : <Navigate to="/login" />} />
       
       {/* 重定向规则 */}
       <Route path="/" element={<Navigate to="/login" />} />

@@ -33,6 +33,7 @@ export default function ActivityDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
   const [registrationStatus, setRegistrationStatus] = useState(null);
+  const [orderStatus, setOrderStatus] = useState(null);
   const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
@@ -63,16 +64,42 @@ export default function ActivityDetailPage() {
   const fetchRegistrationStatus = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/registration/status/${id}`, {
+      
+      // 获取报名状态
+      const registrationResponse = await fetch(`${API_BASE_URL}/api/registration/status/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setRegistrationStatus(data.data);
+      if (registrationResponse.ok) {
+        const registrationData = await registrationResponse.json();
+        setRegistrationStatus(registrationData.data);
+        
+        // 如果已报名且状态是approved，检查订单支付状态
+        if (registrationData.data && registrationData.data.isRegistered && 
+            registrationData.data.status === 'approved') {
+          const orderResponse = await fetch(`${API_BASE_URL}/api/order/my?limit=100`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (orderResponse.ok) {
+            const orderData = await orderResponse.json();
+            
+            // 查找与当前活动相关的订单
+            const activityOrder = orderData.data.orders.find(order => 
+              order.registration && order.registration.activityId === parseInt(id)
+            );
+            
+            if (activityOrder) {
+              setOrderStatus(activityOrder);
+            }
+          }
+        }
       }
     } catch (error) {
       console.error('获取报名状态失败:', error);
@@ -144,35 +171,67 @@ export default function ActivityDetailPage() {
       return { show: false, disabled: true, text: '加载中...', reason: '正在加载活动信息' };
     }
 
-    // 检查是否是自己创建的活动 - 不显示按钮
+    // 检查是否是自己创建的活动 - 显示为不可点击
     if (activity.creator && activity.creator.userid === currentUser.userid) {
-      return { show: false, disabled: true, text: '自己创建的活动', reason: '这是您创建的活动' };
+      return { show: true, disabled: true, text: '您创建的活动', reason: '这是您创建的活动，可以在管理页面查看报名情况' };
     }
 
-    // 检查活动状态 - 已结束/已取消的活动不显示按钮
+    // 检查活动状态 - 已结束/已取消的活动显示为不可点击
     if (activity.status === 'completed') {
-      return { show: false, disabled: true, text: '活动已结束', reason: '活动已结束' };
+      return { show: true, disabled: true, text: '活动已结束', reason: '活动已结束，无法报名' };
     }
     
     if (activity.status === 'cancelled') {
-      return { show: false, disabled: true, text: '活动已取消', reason: '活动已取消' };
+      return { show: true, disabled: true, text: '活动已取消', reason: '活动已取消，无法报名' };
     }
     
     if (activity.status !== 'published') {
-      return { show: false, disabled: true, text: '活动未发布', reason: '活动尚未发布' };
+      return { show: true, disabled: true, text: '活动未发布', reason: '活动尚未发布，无法报名' };
     }
 
-    // 检查是否已经报名 - 显示已报名状态
+    // 检查是否已经报名 - 显示具体报名状态
     if (registrationStatus && registrationStatus.isRegistered) {
-      return { show: true, disabled: true, text: '已报名', reason: '您已报名此活动' };
+      const status = registrationStatus.status;
+      switch (status) {
+        case 'pending':
+          return { show: true, disabled: true, text: '审核中', reason: '您的报名正在审核中' };
+        case 'approved':
+          // 检查是否有已支付的订单
+          if (orderStatus) {
+            switch (orderStatus.status) {
+              case 'paid':
+                return { show: true, disabled: true, text: '已支付', reason: '您已完成支付，请按时参加活动' };
+              case 'pending':
+                return { show: true, disabled: true, text: '待支付', reason: '您有未支付的订单，请前往订单页面完成支付' };
+              case 'cancelled':
+              case 'expired':
+                return { show: true, disabled: false, text: '重新报名', reason: '您的订单已取消或过期，可以重新报名' };
+              case 'refunded':
+                return { show: true, disabled: true, text: '已退款', reason: '您的订单已退款' };
+              default:
+                return { show: true, disabled: true, text: '已通过', reason: '您的报名已通过审核' };
+            }
+          }
+          return { show: true, disabled: true, text: '已通过', reason: '您的报名已通过审核' };
+        case 'rejected':
+          return { show: true, disabled: false, text: '重新报名', reason: '您的报名已被拒绝，可以重新报名' };
+        case 'cancelled':
+          // 检查是否是因为退款而取消，如果是则禁止重新报名
+          if (registrationStatus.hasRefunded) {
+            return { show: true, disabled: true, text: '已退款', reason: '您已申请退款，因此无法重新报名此活动' };
+          }
+          return { show: true, disabled: false, text: '重新报名', reason: '您已取消报名，可以重新报名' };
+        default:
+          return { show: true, disabled: true, text: '已报名', reason: '您已报名此活动' };
+      }
     }
 
-    // 检查时间限制 - 活动已开始不显示按钮
+    // 检查时间限制 - 活动已开始显示为不可点击
     const now = new Date();
     const startTime = new Date(activity.startTime);
     
     if (now >= startTime) {
-      return { show: false, disabled: true, text: '活动已开始', reason: '活动已开始，无法报名' };
+      return { show: true, disabled: true, text: '活动已开始', reason: '活动已开始，无法报名' };
     }
 
     // 检查报名截止时间 - 显示已截止状态
@@ -526,23 +585,17 @@ export default function ActivityDetailPage() {
                           >
                             {registering ? '报名中...' : buttonStatus.text}
                           </button>
-                          {buttonStatus.disabled && buttonStatus.reason && (
+                          {buttonStatus.reason && (
                             <p className="text-sm text-gray-500 mt-2">{buttonStatus.reason}</p>
                           )}
                         </>
                       ) : (
-                        buttonStatus.reason && (
-                          <div className="text-center">
-                            <p className="text-gray-500 text-lg mb-2">{buttonStatus.reason}</p>
-                            <p className="text-sm text-gray-400">
-                              {buttonStatus.text === '自己创建的活动' && '您可以在管理页面查看报名情况'}
-                              {buttonStatus.text === '活动已结束' && '感谢您的关注'}
-                              {buttonStatus.text === '活动已取消' && '很抱歉给您带来不便'}
-                              {buttonStatus.text === '活动未发布' && '活动尚未开放报名'}
-                              {buttonStatus.text === '活动已开始' && '错过了报名时间'}
-                            </p>
-                          </div>
-                        )
+                        <div className="text-center">
+                          <p className="text-gray-500 text-lg mb-2">暂不可报名</p>
+                          <p className="text-sm text-gray-400">
+                            {buttonStatus.reason || '该活动当前不开放报名'}
+                          </p>
+                        </div>
                       )}
                     </div>
                     
