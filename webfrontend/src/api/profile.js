@@ -1,4 +1,4 @@
-const API_BASE = '/api/user';
+const API_BASE = 'http://localhost:7001/api/user';
 
 // 获取个人信息
 // 添加signal参数以支持请求取消
@@ -27,27 +27,47 @@ export async function getProfileApi({ signal } = {}) {
 
 // 更新个人信息
 export async function updateProfileApi(profile) {
+  const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE}/profile`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify(profile),
   });
   if (!res.ok) throw new Error('保存个人信息失败');
-  return res.json();
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '保存个人信息失败');
+  }
+  return data;
 }
 
 // 上传头像
 export async function uploadAvatarApi(file) {
   const formData = new FormData();
   formData.append('avatar', file);
-  const res = await fetch(`${API_BASE}/profile/avatar`, {
+  
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/upload-avatar`, {
     method: 'POST',
-    credentials: 'include',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
     body: formData,
   });
-  if (!res.ok) throw new Error('上传头像失败');
-  return res.json();
+  
+  if (!res.ok) {
+    throw new Error('头像上传失败');
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '头像上传失败');
+  }
+  
+  return data;
 }
 
 // 上传照片
@@ -61,4 +81,56 @@ export async function uploadPhotoApi(file) {
   });
   if (!res.ok) throw new Error('上传照片失败');
   return res.json();
+}
+
+// 批量上传照片到照片墙
+export async function uploadPhotosApi(files) {
+  const formData = new FormData();
+  files.forEach(file => {
+    formData.append('photos', file);
+  });
+  
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/upload-photos`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: formData,
+  });
+  
+  if (!res.ok) {
+    throw new Error('照片上传失败');
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '照片上传失败');
+  }
+  
+  return data;
+}
+
+// 删除照片墙中的照片
+export async function deletePhotoApi(photoIndex) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}/delete-photo`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ photoIndex }),
+  });
+  
+  if (!res.ok) {
+    throw new Error('删除照片失败');
+  }
+  
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(data.message || '删除照片失败');
+  }
+  
+  return data;
 }

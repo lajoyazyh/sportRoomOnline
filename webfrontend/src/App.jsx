@@ -7,6 +7,9 @@ import HomeDashboard from './pages/Home/HomeDashboard';
 import SquarePage from './pages/Square/SquarePage';
 import ManagePage from './pages/Manage/ManagePage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import CreateActivityPage from './pages/CreateActivity/CreateActivityPage';
+import EditActivityPage from './pages/Activity/EditActivityPage';
+import ActivityDetailPage from './pages/ActivityDetail/ActivityDetailPage';
 import { getProfileApi } from './api/profile';
 
 function App() {
@@ -30,8 +33,10 @@ function App() {
 
         // 直接使用API返回数据，不进行额外验证
         setUser(userData.data || userData);
-        // 路由保护：未在/home路径则重定向
-        if (!location.pathname.startsWith('/home')) {
+        // 路由保护：未在允许的路径则重定向
+        const allowedPaths = ['/home', '/activity'];
+        const isAllowedPath = allowedPaths.some(path => location.pathname.startsWith(path));
+        if (!isAllowedPath) {
           navigate('/home');
         }
       } catch (error) {
@@ -60,7 +65,7 @@ function App() {
   return (
     <Routes>
       {/* 公共路由 */}
-      <Route path="/login" element={!user ? <LoginPage onLoginSuccess={() => setUser(true)} /> : <Navigate to="/home" />} />
+      <Route path="/login" element={!user ? <LoginPage onLoginSuccess={(userData) => setUser(userData)} /> : <Navigate to="/home" />} />
       <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/home" />} />
       
       {/* 需要授权的路由 */}
@@ -74,6 +79,11 @@ function App() {
         <Route path="manage" element={<ManagePage />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
+      
+      {/* 活动相关路由 */}
+      <Route path="/activity/create" element={user ? <CreateActivityPage /> : <Navigate to="/login" />} />
+      <Route path="/activity/edit/:id" element={user ? <EditActivityPage /> : <Navigate to="/login" />} />
+      <Route path="/activity/:id" element={user ? <ActivityDetailPage /> : <Navigate to="/login" />} />
       
       {/* 重定向规则 */}
       <Route path="/" element={<Navigate to="/login" />} />
