@@ -29,7 +29,6 @@ export class ActivityController {
   userService: UserService;
 
   @Post('/create')
-  @Validate()
   async createActivity(
     @Body() activityData: CreateActivityDTO,
     @Headers('authorization') authHeader: string
@@ -46,20 +45,26 @@ export class ActivityController {
       const payload = await this.userService.validateToken(token);
       console.log('🔍 [createActivity] 创建者ID:', payload.userid);
 
+      // 如果是草稿状态，跳过DTO验证
+      const isDraft = activityData.status === 'draft';
+
       const activity = await this.activityService.createActivity(
         activityData,
-        payload.userid
+        payload.userid,
+        isDraft
       );
 
       console.log(
         '🔍 [createActivity] 已创建活动ID:',
         activity.id,
         '创建者ID:',
-        activity.creatorId
+        activity.creatorId,
+        '状态:',
+        activity.status
       );
       return {
         success: true,
-        message: '活动创建成功',
+        message: isDraft ? '草稿保存成功' : '活动创建成功',
         data: activity,
       };
     } catch (error) {

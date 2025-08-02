@@ -15,6 +15,7 @@ import { UserService } from '../service/user.service';
 import {
   CreateRegistrationDTO,
   RegistrationQueryDTO,
+  ReviewRegistrationDTO,
 } from '../dto/registration.dto';
 
 @Controller('/api/registration')
@@ -216,6 +217,48 @@ export class RegistrationController {
       return {
         success: false,
         message: error.message || '获取报名状态失败',
+      };
+    }
+  }
+
+  @Post('/review/:registrationId')
+  @Validate()
+  async reviewRegistration(
+    @Param('registrationId') registrationId: string,
+    @Body() reviewData: ReviewRegistrationDTO,
+    @Headers('authorization') authHeader: string
+  ) {
+    try {
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return {
+          success: false,
+          message: '缺少认证令牌',
+        };
+      }
+
+      const token = authHeader.substring(7);
+      const payload = await this.userService.validateToken(token);
+      const regIdNum = parseInt(registrationId);
+
+      if (isNaN(regIdNum)) {
+        return {
+          success: false,
+          message: '无效的报名ID',
+        };
+      }
+
+      const result = await this.registrationService.reviewRegistration(
+        regIdNum,
+        payload.userid,
+        reviewData.status,
+        reviewData.rejectReason
+      );
+
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || '审核失败',
       };
     }
   }

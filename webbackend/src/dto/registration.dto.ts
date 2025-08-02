@@ -41,3 +41,15 @@ export class RegistrationQueryDTO {
   @Rule(RuleType.number().integer().min(1).max(100).default(10))
   pageSize?: number;
 }
+
+export class ReviewRegistrationDTO {
+  @Rule(
+    RuleType.string()
+      .required()
+      .valid(RegistrationStatus.APPROVED, RegistrationStatus.REJECTED)
+  )
+  status: RegistrationStatus;
+
+  @Rule(RuleType.string().optional().allow('').max(500))
+  rejectReason?: string;
+}

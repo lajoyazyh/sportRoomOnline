@@ -6,6 +6,7 @@ const navs = [
   { key: 'square', label: '活动广场', path: '/home/square' },
   { key: 'manage', label: '活动管理', path: '/home/manage' },
   { key: 'profile', label: '个人信息', path: '/home/profile' },
+  { key: 'orders', label: '我的订单', path: '/home/orders' },
 ];
 
 function HomePage({ onLogout }) {

@@ -20,6 +20,8 @@ export default function EditActivityPage() {
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [activity, setActivity] = useState(null); // 添加活动状态
+  const [images, setImages] = useState([]); // 添加图片状态
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -50,7 +52,8 @@ export default function EditActivityPage() {
 
         if (response.ok) {
           const data = await response.json();
-          const activity = data.data;
+          const activityData = data.data;
+          setActivity(activityData); // 保存活动数据
           
           // 格式化时间为表单需要的格式
           const formatDateTime = (dateString) => {
@@ -59,20 +62,33 @@ export default function EditActivityPage() {
           };
 
           setFormData({
-            title: activity.title || '',
-            description: activity.description || '',
-            type: activity.type || 'fitness',
-            location: activity.location || '',
-            startTime: formatDateTime(activity.startTime),
-            endTime: formatDateTime(activity.endTime),
-            registrationDeadline: formatDateTime(activity.registrationDeadline),
-            minParticipants: activity.minParticipants || 1,
-            maxParticipants: activity.maxParticipants || 20,
-            fee: activity.fee || 0,
-            requirements: activity.requirements || '',
-            equipment: activity.equipment || '',
-            contactInfo: activity.contactInfo || '',
+            title: activityData.title || '',
+            description: activityData.description || '',
+            type: activityData.type || 'fitness',
+            location: activityData.location || '',
+            startTime: formatDateTime(activityData.startTime),
+            endTime: formatDateTime(activityData.endTime),
+            registrationDeadline: formatDateTime(activityData.registrationDeadline),
+            minParticipants: activityData.minParticipants || 1,
+            maxParticipants: activityData.maxParticipants || 20,
+            fee: activityData.fee || 0,
+            requirements: activityData.requirements || '',
+            equipment: activityData.equipment || '',
+            contactInfo: activityData.contactInfo || '',
           });
+
+          // 解析并设置图片
+          if (activityData.images) {
+            try {
+              const parsedImages = JSON.parse(activityData.images);
+              setImages(Array.isArray(parsedImages) ? parsedImages : []);
+            } catch (error) {
+              console.error('解析图片数据失败:', error);
+              setImages([]);
+            }
+          } else {
+            setImages([]);
+          }
         } else {
           alert('获取活动详情失败');
           navigate('/home/manage');
@@ -90,6 +106,27 @@ export default function EditActivityPage() {
       fetchActivityDetail();
     }
   }, [id, navigate]);
+
+  // 判断字段是否应该被禁用（已发布的活动限制某些关键字段）
+  const isFieldDisabled = (fieldName) => {
+    if (!activity || activity.status === 'draft') {
+      return false; // 草稿状态所有字段都可以编辑
+    }
+    
+    // 已发布的活动不能修改的关键字段
+    const restrictedFields = [
+      'title',        // 活动名称
+      'type',         // 活动类型
+      'fee',          // 活动费用
+      'startTime',    // 开始时间
+      'endTime',      // 结束时间
+      'registrationDeadline', // 报名截止时间
+      'minParticipants',      // 最少参与人数
+      'maxParticipants',      // 最多参与人数
+    ];
+    
+    return restrictedFields.includes(fieldName);
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -111,6 +148,29 @@ export default function EditActivityPage() {
         [name]: type === 'number' ? Number(value) : value
       }));
     }
+  };
+
+  // 处理图片上传
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    
+    files.forEach(file => {
+      if (file.size > 5 * 1024 * 1024) { // 5MB限制
+        alert('图片大小不能超过5MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImages(prev => [...prev, event.target.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // 删除图片
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -166,7 +226,10 @@ export default function EditActivityPage() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          images: JSON.stringify(images)
+        }),
       });
 
       const result = await response.json();
@@ -206,11 +269,32 @@ export default function EditActivityPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="p-6">
+            {/* 如果是已发布活动，显示提示信息 */}
+            {activity && activity.status === 'published' && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                <div className="flex">
+                  <svg className="w-5 h-5 text-yellow-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <h3 className="text-sm font-medium text-yellow-800">已发布活动编辑限制</h3>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      为保护已报名用户权益，部分关键信息（如标题、时间、价格等）不可修改。
+                      您仍可以编辑活动描述、地点、要求等其他信息。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 活动标题 */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   活动标题 *
+                  {isFieldDisabled('title') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <input
                   type="text"
@@ -218,7 +302,12 @@ export default function EditActivityPage() {
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="请输入活动标题"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('title') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('title')}
                   required
                 />
               </div>
@@ -227,12 +316,20 @@ export default function EditActivityPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   活动类型 *
+                  {isFieldDisabled('type') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <select
                   name="type"
                   value={formData.type}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('type') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('type')}
                   required
                 >
                   {Object.entries(ActivityType).map(([key, label]) => (
@@ -261,13 +358,21 @@ export default function EditActivityPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   开始时间 *
+                  {isFieldDisabled('startTime') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <input
                   type="datetime-local"
                   name="startTime"
                   value={formData.startTime}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('startTime') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('startTime')}
                   required
                 />
               </div>
@@ -276,13 +381,21 @@ export default function EditActivityPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   结束时间 *
+                  {isFieldDisabled('endTime') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <input
                   type="datetime-local"
                   name="endTime"
                   value={formData.endTime}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('endTime') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('endTime')}
                   required
                 />
               </div>
@@ -291,13 +404,21 @@ export default function EditActivityPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   报名截止时间 *
+                  {isFieldDisabled('registrationDeadline') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <input
                   type="datetime-local"
                   name="registrationDeadline"
                   value={formData.registrationDeadline}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('registrationDeadline') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('registrationDeadline')}
                   required
                 />
               </div>
@@ -306,6 +427,9 @@ export default function EditActivityPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   最少参与人数
+                  {isFieldDisabled('minParticipants') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <input
                   type="number"
@@ -313,7 +437,12 @@ export default function EditActivityPage() {
                   value={formData.minParticipants}
                   onChange={handleInputChange}
                   min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('minParticipants') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('minParticipants')}
                 />
               </div>
 
@@ -321,6 +450,9 @@ export default function EditActivityPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   最多参与人数
+                  {isFieldDisabled('maxParticipants') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <input
                   type="number"
@@ -328,7 +460,12 @@ export default function EditActivityPage() {
                   value={formData.maxParticipants}
                   onChange={handleInputChange}
                   min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('maxParticipants') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('maxParticipants')}
                 />
               </div>
 
@@ -336,6 +473,9 @@ export default function EditActivityPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   活动费用（元）
+                  {isFieldDisabled('fee') && (
+                    <span className="text-xs text-gray-500 ml-2">(已发布不可修改)</span>
+                  )}
                 </label>
                 <input
                   type="number"
@@ -345,7 +485,12 @@ export default function EditActivityPage() {
                   min="0"
                   step="0.01"
                   placeholder="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isFieldDisabled('fee') 
+                      ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                      : 'border-gray-300'
+                  }`}
+                  disabled={isFieldDisabled('fee')}
                 />
               </div>
 
@@ -408,6 +553,43 @@ export default function EditActivityPage() {
                   placeholder="请说明需要携带的装备或提供的装备"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+
+              {/* 活动图片 */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  活动图片
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-sm text-gray-500 mt-1">可上传多张图片，每张图片不超过5MB</p>
+                
+                {/* 图片预览 */}
+                {images.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {images.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={image}
+                          alt={`预览 ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-md border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

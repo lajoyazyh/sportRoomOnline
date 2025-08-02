@@ -56,6 +56,32 @@ function ProfilePage() {
 
   return (
     <div className="max-w-[520px] mx-auto py-10 px-10 pb-8 relative">
+      {/* 导航菜单 */}
+      <div className="mb-6 flex justify-center">
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setVisitorMode(true)}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              visitorMode 
+                ? 'bg-white shadow-sm text-blue-600 font-medium' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            个人资料
+          </button>
+          <button
+            onClick={() => setVisitorMode(false)}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              !visitorMode 
+                ? 'bg-white shadow-sm text-blue-600 font-medium' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            编辑资料
+          </button>
+        </div>
+      </div>
+      
       <h2 className="text-center mb-8 font-bold text-[28px] text-gray-800">
         {visitorMode ? '个人资料' : '编辑资料'}
       </h2>
@@ -364,29 +390,6 @@ function ProfilePage() {
               <div key={`ph-empty-${i}`} className="h-[110px]" />
             ))}
           </div>
-          {/* 预览/编辑切换按钮 */}
-          <div className="mt-4.5 text-right">
-            <button
-              type="button"
-              onClick={() => setVisitorMode(v => !v)}
-              className="bg-gray-200 text-gray-700 border-none rounded-md py-1.5 px-4.5 font-medium text-[15px] cursor-pointer shadow-sm hover:bg-gray-300 transition-colors"
-            >
-              {visitorMode ? '编辑资料' : '回到预览'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 预览模式下的编辑按钮 */}
-      {visitorMode && (
-        <div className="mt-8 text-center">
-          <button
-            type="button"
-            onClick={() => setVisitorMode(false)}
-            className="bg-indigo-500 text-white border-none rounded-lg py-3 px-8 font-semibold text-lg cursor-pointer shadow-md hover:bg-indigo-600 transition-colors"
-          >
-            编辑资料
-          </button>
         </div>
       )}
     </div>
