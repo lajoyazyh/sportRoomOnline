@@ -140,74 +140,82 @@ export default function ActivityDetailPage() {
 
   // 获取报名按钮状态和文本
   const getRegistrationButtonStatus = () => {
-    console.log('=== 按钮状态检查 ===');
-    console.log('activity:', activity);
-    console.log('currentUser:', currentUser);
-    console.log('registrationStatus:', registrationStatus);
-    
     if (!activity || !currentUser) {
-      console.log('活动或用户信息未加载');
       return { show: false, disabled: true, text: '加载中...', reason: '正在加载活动信息' };
     }
 
     // 检查是否是自己创建的活动 - 不显示按钮
     if (activity.creator && activity.creator.userid === currentUser.userid) {
-      console.log('自己创建的活动，不显示按钮');
       return { show: false, disabled: true, text: '自己创建的活动', reason: '这是您创建的活动' };
     }
 
     // 检查活动状态 - 已结束/已取消的活动不显示按钮
-    console.log('活动状态:', activity.status);
     if (activity.status === 'completed') {
-      console.log('活动已结束，不显示按钮');
       return { show: false, disabled: true, text: '活动已结束', reason: '活动已结束' };
     }
     
     if (activity.status === 'cancelled') {
-      console.log('活动已取消，不显示按钮');
       return { show: false, disabled: true, text: '活动已取消', reason: '活动已取消' };
     }
     
     if (activity.status !== 'published') {
-      console.log('活动未发布，不显示按钮');
       return { show: false, disabled: true, text: '活动未发布', reason: '活动尚未发布' };
     }
 
     // 检查是否已经报名 - 显示已报名状态
     if (registrationStatus && registrationStatus.isRegistered) {
-      console.log('已报名，显示已报名状态');
       return { show: true, disabled: true, text: '已报名', reason: '您已报名此活动' };
     }
 
     // 检查时间限制 - 活动已开始不显示按钮
     const now = new Date();
     const startTime = new Date(activity.startTime);
-    console.log('当前时间:', now);
-    console.log('活动开始时间:', startTime);
     
     if (now >= startTime) {
-      console.log('活动已开始，不显示按钮');
       return { show: false, disabled: true, text: '活动已开始', reason: '活动已开始，无法报名' };
     }
 
     // 检查报名截止时间 - 显示已截止状态
     const registrationDeadline = new Date(activity.registrationDeadline);
-    console.log('报名截止时间:', registrationDeadline);
     if (now >= registrationDeadline) {
-      console.log('报名已截止，显示已截止状态');
       return { show: true, disabled: true, text: '报名已截止', reason: '报名截止时间已过' };
     }
 
     // 检查人数限制 - 显示已满状态
-    console.log('当前人数:', activity.currentParticipants, '最大人数:', activity.maxParticipants);
     if (activity.currentParticipants >= activity.maxParticipants) {
-      console.log('人数已满，显示已满状态');
       return { show: true, disabled: true, text: '报名已满', reason: '活动人数已满' };
     }
 
     // 可以报名
-    console.log('可以报名，显示立即报名按钮');
     return { show: true, disabled: false, text: '立即报名', reason: '' };
+  };
+
+  // 处理分享活动
+  const handleShare = async () => {
+    try {
+      // 检查是否支持Web Share API
+      if (navigator.share) {
+        await navigator.share({
+          title: activity.title,
+          text: `${activity.description.substring(0, 100)}...`,
+          url: window.location.href,
+        });
+      } else {
+        // 降级处理：复制链接到剪贴板
+        await navigator.clipboard.writeText(window.location.href);
+        alert('活动链接已复制到剪贴板！');
+      }
+    } catch (error) {
+      console.error('分享失败:', error);
+      // 如果剪贴板API也不支持，提供手动复制
+      const textArea = document.createElement('textarea');
+      textArea.value = window.location.href;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('活动链接已复制到剪贴板！');
+    }
   };
 
   // 处理报名
@@ -502,45 +510,59 @@ export default function ActivityDetailPage() {
               {(() => {
                 const buttonStatus = getRegistrationButtonStatus();
                 return (
-                  <div className="flex flex-col items-center">
-                    {buttonStatus.show ? (
-                      <>
-                        <button 
-                          onClick={buttonStatus.disabled ? undefined : handleRegister}
-                          disabled={buttonStatus.disabled || registering}
-                          className={`px-8 py-3 rounded-lg text-lg font-medium transition-colors ${
-                            buttonStatus.disabled 
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                              : 'bg-blue-600 text-white hover:bg-blue-700'
-                          }`}
-                        >
-                          {registering ? '报名中...' : buttonStatus.text}
-                        </button>
-                        {buttonStatus.disabled && buttonStatus.reason && (
-                          <p className="text-sm text-gray-500 mt-2">{buttonStatus.reason}</p>
-                        )}
-                      </>
-                    ) : (
-                      buttonStatus.reason && (
-                        <div className="text-center">
-                          <p className="text-gray-500 text-lg mb-2">{buttonStatus.reason}</p>
-                          <p className="text-sm text-gray-400">
-                            {buttonStatus.text === '自己创建的活动' && '您可以在管理页面查看报名情况'}
-                            {buttonStatus.text === '活动已结束' && '感谢您的关注'}
-                            {buttonStatus.text === '活动已取消' && '很抱歉给您带来不便'}
-                            {buttonStatus.text === '活动未发布' && '活动尚未开放报名'}
-                            {buttonStatus.text === '活动已开始' && '错过了报名时间'}
-                          </p>
-                        </div>
-                      )
-                    )}
-                  </div>
+                  <>
+                    {/* 报名相关按钮 */}
+                    <div className="flex flex-col items-center">
+                      {buttonStatus.show ? (
+                        <>
+                          <button 
+                            onClick={buttonStatus.disabled ? undefined : handleRegister}
+                            disabled={buttonStatus.disabled || registering}
+                            className={`px-8 py-3 rounded-lg text-lg font-medium transition-colors ${
+                              buttonStatus.disabled 
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                          >
+                            {registering ? '报名中...' : buttonStatus.text}
+                          </button>
+                          {buttonStatus.disabled && buttonStatus.reason && (
+                            <p className="text-sm text-gray-500 mt-2">{buttonStatus.reason}</p>
+                          )}
+                        </>
+                      ) : (
+                        buttonStatus.reason && (
+                          <div className="text-center">
+                            <p className="text-gray-500 text-lg mb-2">{buttonStatus.reason}</p>
+                            <p className="text-sm text-gray-400">
+                              {buttonStatus.text === '自己创建的活动' && '您可以在管理页面查看报名情况'}
+                              {buttonStatus.text === '活动已结束' && '感谢您的关注'}
+                              {buttonStatus.text === '活动已取消' && '很抱歉给您带来不便'}
+                              {buttonStatus.text === '活动未发布' && '活动尚未开放报名'}
+                              {buttonStatus.text === '活动已开始' && '错过了报名时间'}
+                            </p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                    
+                    {/* 其他操作按钮 */}
+                    <button 
+                      onClick={handleShare}
+                      className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      分享活动
+                    </button>
+                    
+                    <Link
+                      to="/home/square"
+                      className="border border-blue-600 text-blue-600 px-8 py-3 rounded-lg text-lg font-medium hover:bg-blue-50 transition-colors"
+                    >
+                      回到活动广场
+                    </Link>
+                  </>
                 );
               })()}
-              
-              <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-medium hover:bg-gray-50 transition-colors">
-                分享活动
-              </button>
             </div>
           </div>
         </div>
