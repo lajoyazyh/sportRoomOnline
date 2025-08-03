@@ -65,3 +65,9 @@ jobs:
         echo "=== Backend Security Audit ==="
         cd ../webbackend
         npm audit --audit-level=high || true
+    
+    - name: Run Tests
+      run: |
+        echo "=== Running Backend Tests ==="
+        cd webbackend
+        npm test -- --maxWorkers=1 --testTimeout=30000 --forceExit
