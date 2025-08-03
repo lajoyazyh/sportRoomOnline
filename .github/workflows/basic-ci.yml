@@ -46,3 +46,13 @@ jobs:
       run: |
         cd webbackend
         npm run type-check
+    
+    - name: Build Frontend
+      run: |
+        cd webfrontend
+        npm run build
+    
+    - name: Build Backend
+      run: |
+        cd webbackend
+        npm run build
