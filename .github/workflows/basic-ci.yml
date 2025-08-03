@@ -1,0 +1,43 @@
+name: Basic CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # 只检查代码格式，不运行测试
+  lint-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: |
+          webfrontend/package-lock.json
+          webbackend/package-lock.json
+    
+    - name: Install Frontend Dependencies
+      run: |
+        cd webfrontend
+        npm ci
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd webbackend
+        npm ci
+    
+    - name: Lint Frontend Code
+      run: |
+        cd webfrontend
+        npm run lint
+    
+    - name: Lint Backend Code
+      run: |
+        cd webbackend
+        npm run lint
