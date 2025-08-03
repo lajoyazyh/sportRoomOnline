@@ -56,3 +56,12 @@ jobs:
       run: |
         cd webbackend
         npm run build
+    
+    - name: Security Audit
+      run: |
+        echo "=== Frontend Security Audit ==="
+        cd webfrontend
+        npm audit --audit-level=high || true
+        echo "=== Backend Security Audit ==="
+        cd ../webbackend
+        npm audit --audit-level=high || true
