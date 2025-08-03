@@ -46,6 +46,7 @@
     "cov": "jest --coverage",
     "lint": "mwts check",
     "lint:fix": "mwts fix",
+    "type-check": "mwtsc --noEmit",
     "ci": "npm run cov",
     "build": "mwtsc --cleanOutDir"
   },

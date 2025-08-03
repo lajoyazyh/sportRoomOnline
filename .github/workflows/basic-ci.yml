@@ -41,3 +41,8 @@ jobs:
       run: |
         cd webbackend
         npm run lint
+    
+    - name: TypeScript Type Check
+      run: |
+        cd webbackend
+        npm run type-check
