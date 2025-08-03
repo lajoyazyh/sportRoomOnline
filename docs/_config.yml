@@ -1,0 +1,16 @@
+# GitHub Pages configuration for SportRoomOnline Project Showcase
+title: "SportRoomOnline - 体育活动室在线管理系统"
+description: "现代化体育活动管理平台 - Web开发课程大作业展示"
+
+# 基本设置
+markdown: kramdown
+highlighter: rouge
+
+# 排除不需要的文件
+exclude:
+  - "*.log"
+  - Gemfile
+  - Gemfile.lock
+
+# GitHub信息
+github_username: lajoyazyh
