@@ -1,0 +1,104 @@
+name: Automated Testing
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd webbackend
+        npm ci
+    
+    - name: Run Unit Tests
+      run: |
+        cd webbackend
+        npm run test:coverage
+    
+    - name: Upload Coverage Reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: webbackend/coverage/lcov.info
+        flags: backend
+        name: backend-coverage
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    services:
+      sqlite:
+        image: sqlite:latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Dependencies
+      run: |
+        cd webbackend
+        npm ci
+    
+    - name: Run Integration Tests
+      run: |
+        cd webbackend
+        npm run test:integration
+      env:
+        NODE_ENV: test
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Frontend Dependencies
+      run: |
+        cd webfrontend
+        npm ci
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd webbackend
+        npm ci
+    
+    - name: Start Backend Server
+      run: |
+        cd webbackend
+        npm run dev &
+        sleep 10
+      env:
+        NODE_ENV: test
+    
+    - name: Start Frontend Server
+      run: |
+        cd webfrontend
+        npm run dev &
+        sleep 10
+    
+    - name: Run E2E Tests
+      run: |
+        cd webfrontend
+        npm run test:e2e

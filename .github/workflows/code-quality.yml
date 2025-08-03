@@ -1,0 +1,79 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Frontend Dependencies
+      run: |
+        cd webfrontend
+        npm ci
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd webbackend
+        npm ci
+    
+    - name: Lint Frontend
+      run: |
+        cd webfrontend
+        npm run lint
+    
+    - name: Lint Backend
+      run: |
+        cd webbackend
+        npm run lint
+    
+    - name: Check TypeScript Types
+      run: |
+        cd webbackend
+        npm run type-check
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+    
+    - name: Run npm audit
+      run: |
+        cd webbackend && npm audit --audit-level=high
+        cd webfrontend && npm audit --audit-level=high
+
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Dependencies
+      run: |
+        npm install -g prettier
+    
+    - name: Check Code Formatting
+      run: |
+        prettier --check "webfrontend/src/**/*.{js,jsx,ts,tsx}"
+        prettier --check "webbackend/src/**/*.{js,ts}"

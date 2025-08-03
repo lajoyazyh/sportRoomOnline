@@ -1,0 +1,108 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # 前端构建和测试
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: webfrontend/package-lock.json
+    
+    - name: Install Frontend Dependencies
+      run: |
+        cd webfrontend
+        npm ci
+    
+    - name: Lint Frontend Code
+      run: |
+        cd webfrontend
+        npm run lint
+    
+    - name: Build Frontend
+      run: |
+        cd webfrontend
+        npm run build
+    
+    - name: Upload Frontend Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-build
+        path: webfrontend/dist
+
+  # 后端构建和测试
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: webbackend/package-lock.json
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd webbackend
+        npm ci
+    
+    - name: Lint Backend Code
+      run: |
+        cd webbackend
+        npm run lint
+    
+    - name: Run Backend Tests
+      run: |
+        cd webbackend
+        npm run test
+    
+    - name: Build Backend
+      run: |
+        cd webbackend
+        npm run build
+
+  # 代码质量检查
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript, typescript
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+  # 部署（仅在main分支）
+  deploy:
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download Frontend Build
+      uses: actions/download-artifact@v3
+      with:
+        name: frontend-build
+        path: webfrontend/dist
+    
+    - name: Deploy to Production
+      run: |
+        echo "部署到生产环境"
+        # 这里可以添加实际的部署脚本

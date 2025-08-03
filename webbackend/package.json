@@ -43,10 +43,13 @@
     "start": "NODE_ENV=production node ./bootstrap.js",
     "dev": "cross-env NODE_ENV=local mwtsc --watch --run @midwayjs/mock/app.js",
     "test": "cross-env NODE_ENV=unittest jest",
+    "test:coverage": "cross-env NODE_ENV=unittest jest --coverage",
+    "test:integration": "cross-env NODE_ENV=test jest --testPathPattern=integration",
     "cov": "jest --coverage",
     "lint": "mwts check",
     "lint:fix": "mwts fix",
-    "ci": "npm run cov",
+    "type-check": "tsc --noEmit",
+    "ci": "npm run lint && npm run type-check && npm run test:coverage",
     "build": "mwtsc --cleanOutDir"
   },
   "repository": {

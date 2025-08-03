@@ -46,6 +46,8 @@
 - VS Code
 - Git
 - npm/yarn
+- GitHub Actions (CI/CD)
+- 自动化测试和部署
 
 ---
 
