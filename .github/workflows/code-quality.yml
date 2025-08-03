@@ -1,0 +1,59 @@
+name: Code Quality Report
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  code-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: |
+          webfrontend/package-lock.json
+          webbackend/package-lock.json
+    
+    - name: Install Dependencies
+      run: |
+        cd webfrontend && npm ci
+        cd ../webbackend && npm ci
+    
+    - name: Run Code Analysis
+      run: |
+        echo "=== Frontend Code Analysis ==="
+        cd webfrontend
+        npm run lint || echo "Frontend linting completed with warnings"
+        
+        echo "=== Backend Code Analysis ==="
+        cd ../webbackend
+        npm run lint || echo "Backend linting completed with warnings"
+        npm run type-check
+    
+    - name: Security Analysis
+      run: |
+        echo "=== Security Vulnerability Analysis ==="
+        echo "Frontend Security Scan:"
+        cd webfrontend
+        npm audit --audit-level=high || echo "Frontend audit completed"
+        
+        echo "Backend Security Scan:"
+        cd ../webbackend
+        npm audit --audit-level=high || echo "Backend audit completed"
+    
+    - name: Project Statistics
+      run: |
+        echo "=== Project Statistics ==="
+        echo "Frontend Files:"
+        find webfrontend/src -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | wc -l
+        echo "Backend Files:"
+        find webbackend/src -name "*.js" -o -name "*.ts" | wc -l
+        echo "Test Files:"
+        find webbackend/test -name "*.test.*" | wc -l

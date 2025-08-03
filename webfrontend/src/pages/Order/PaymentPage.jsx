@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { orderAPI, PAYMENT_METHOD, PAYMENT_METHOD_TEXT } from '../../api/order';
 
@@ -13,7 +13,7 @@ const PaymentPage = () => {
   const [timeLeft, setTimeLeft] = useState(0);
 
   // 加载订单详情
-  const loadOrder = async () => {
+  const loadOrder = useCallback(async () => {
     try {
       setLoading(true);
       const response = await orderAPI.getOrder(orderId);
@@ -34,7 +34,7 @@ const PaymentPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
 
   // 处理支付
   const handlePayment = async () => {
@@ -103,7 +103,7 @@ const PaymentPage = () => {
     if (orderId) {
       loadOrder();
     }
-  }, [orderId]);
+  }, [orderId, loadOrder]);
 
   if (loading) {
     return (
