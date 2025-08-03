@@ -1,0 +1,34 @@
+# GitHub Pages configuration for SportRoomOnline Project Showcase
+title: "SportRoomOnline - 体育活动室在线管理系统"
+description: "现代化体育活动管理平台 - Web开发课程大作业展示"
+url: "https://lajoyazyh.github.io"
+baseurl: "/sportRoomOnline"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Exclude files
+exclude:
+  - webbackend/
+  - webfrontend/
+  - node_modules/
+  - .github/
+  - "*.log"
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+
+# Include files
+include:
+  - docs/
+
+# SEO settings
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Social media
+github_username: lajoyazyh
+repository: lajoyazyh/sportRoomOnline
