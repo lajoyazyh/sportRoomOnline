@@ -70,4 +70,4 @@ jobs:
       run: |
         echo "=== Running Backend Tests ==="
         cd webbackend
-        npm test -- --maxWorkers=1 --testTimeout=30000 --forceExit
+        npm test

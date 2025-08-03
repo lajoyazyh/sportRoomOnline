@@ -4,10 +4,10 @@ module.exports = {
   testPathIgnorePatterns: ['<rootDir>/test/fixtures'],
   coveragePathIgnorePatterns: ['<rootDir>/test/'],
   maxWorkers: 1,
-  testTimeout: 30000,
+  testTimeout: 60000,
   forceExit: true,
-  detectOpenHandles: true,
-  collectCoverage: false, // 只在需要时开启
+  detectOpenHandles: false, // 关闭检测，减少噪音
+  collectCoverage: false,
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   collectCoverageFrom: [

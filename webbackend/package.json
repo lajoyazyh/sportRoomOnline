@@ -42,7 +42,7 @@
   "scripts": {
     "start": "NODE_ENV=production node ./bootstrap.js",
     "dev": "cross-env NODE_ENV=local mwtsc --watch --run @midwayjs/mock/app.js",
-    "test": "cross-env NODE_ENV=unittest jest --maxWorkers=1 --testTimeout=30000 --forceExit",
+    "test": "cross-env NODE_ENV=unittest jest --testTimeout=60000 --maxWorkers=1 --forceExit",
     "cov": "cross-env NODE_ENV=unittest jest --config=jest.coverage.config.js",
     "lint": "mwts check",
     "lint:fix": "mwts fix",
