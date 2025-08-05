@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getActivityDetailApi } from '../../api/activity';
+import CommentList from '../../components/CommentList';
 
 const API_BASE_URL = 'http://localhost:7001';
 
@@ -618,6 +619,14 @@ export default function ActivityDetailPage() {
               })()}
             </div>
           </div>
+        </div>
+
+        {/* 评论区域 */}
+        <div className="mt-8">
+          <CommentList 
+            activityId={parseInt(id)} 
+            showCreateForm={true}
+          />
         </div>
       </div>
     </div>
