@@ -42,7 +42,24 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
       const response = await commentAPI.getActivityComments(activityId, page, 10);
       
       if (response.success) {
-        setComments(response.data.comments);
+        const commentsWithLikeStatus = await Promise.all(
+          response.data.comments.map(async (comment) => {
+            try {
+              const likeStatusResponse = await commentAPI.checkUserLiked(comment.id);
+              return {
+                ...comment,
+                userLiked: likeStatusResponse.success ? likeStatusResponse.data.liked : false
+              };
+            } catch {
+              return {
+                ...comment,
+                userLiked: false
+              };
+            }
+          })
+        );
+        
+        setComments(commentsWithLikeStatus);
         setTotalPages(Math.ceil(response.data.total / 10));
         setCurrentPage(page);
         setAverageRating(response.data.averageRating || 0);
@@ -71,16 +88,27 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
     return date.toLocaleString('zh-CN');
   };
 
-  // 处理点赞
+    // 处理点赞切换
   const handleLike = async (commentId) => {
     try {
-      const response = await commentAPI.likeComment(commentId);
+      const response = await commentAPI.toggleLike(commentId);
       if (response.success) {
-        // 重新加载评论列表
-        loadComments(currentPage);
+        // 更新本地评论状态
+        setComments(comments.map(comment => {
+          if (comment.id === commentId) {
+            return {
+              ...comment,
+              likeCount: response.data.likeCount,
+              userLiked: response.data.liked
+            };
+          }
+          return comment;
+        }));
+      } else {
+        console.error('点赞操作失败:', response.message);
       }
     } catch (error) {
-      console.error('点赞失败:', error);
+      console.error('点赞操作失败:', error);
     }
   };
 
@@ -235,9 +263,18 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
               <div className="flex items-center">
                 <button
                   onClick={() => handleLike(comment.id)}
-                  className="flex items-center text-gray-500 hover:text-blue-600 transition-colors"
+                  className={`flex items-center transition-colors ${
+                    comment.userLiked 
+                      ? 'text-blue-600 hover:text-blue-700' 
+                      : 'text-gray-500 hover:text-blue-600'
+                  }`}
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg 
+                    className="w-4 h-4 mr-1" 
+                    fill={comment.userLiked ? "currentColor" : "none"} 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L9 7.5v2.5m7-10V4.375c0 .518-.421.937-.937.937H14V0z" />
                   </svg>
                   <span className="text-sm">{comment.likeCount || 0}</span>

@@ -5,6 +5,7 @@ import { Comment } from '../entity';
 import { Activity } from '../entity';
 import { User } from '../entity';
 import { Registration, RegistrationStatus } from '../entity';
+import { CommentLike } from '../entity';
 
 @Provide()
 export class CommentService {
@@ -19,6 +20,9 @@ export class CommentService {
 
   @InjectEntityModel(Registration)
   registrationRepository: Repository<Registration>;
+
+  @InjectEntityModel(CommentLike)
+  commentLikeRepository: Repository<CommentLike>;
 
   /**
    * 创建评论
@@ -170,6 +174,15 @@ export class CommentService {
       throw new Error('无权限删除此评论');
     }
 
+    // 先删除所有相关的点赞记录
+    const likes = await this.commentLikeRepository.find({
+      where: { commentId: commentId },
+    });
+
+    if (likes.length > 0) {
+      await this.commentLikeRepository.remove(likes);
+    }
+
     const activityId = comment.activityId;
     await this.commentRepository.remove(comment);
 
@@ -291,5 +304,66 @@ export class CommentService {
       canComment: true,
       message: '可以评论',
     };
+  }
+
+  /**
+   * 切换评论点赞状态
+   */
+  async toggleCommentLike(
+    userId: number,
+    commentId: number
+  ): Promise<{ liked: boolean; likeCount: number }> {
+    // 检查评论是否存在
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId },
+    });
+
+    if (!comment) {
+      throw new Error('评论不存在');
+    }
+
+    // 检查用户是否已经点赞
+    const existingLike = await this.commentLikeRepository.findOne({
+      where: { userId, commentId },
+    });
+
+    if (existingLike) {
+      // 已点赞，取消点赞
+      await this.commentLikeRepository.remove(existingLike);
+
+      // 更新评论的点赞数
+      comment.likeCount = Math.max(0, comment.likeCount - 1);
+      await this.commentRepository.save(comment);
+
+      return {
+        liked: false,
+        likeCount: comment.likeCount,
+      };
+    } else {
+      // 未点赞，添加点赞
+      const newLike = new CommentLike();
+      newLike.userId = userId;
+      newLike.commentId = commentId;
+      await this.commentLikeRepository.save(newLike);
+
+      // 更新评论的点赞数
+      comment.likeCount = comment.likeCount + 1;
+      await this.commentRepository.save(comment);
+
+      return {
+        liked: true,
+        likeCount: comment.likeCount,
+      };
+    }
+  }
+
+  /**
+   * 检查用户是否已点赞某评论
+   */
+  async checkUserLiked(userId: number, commentId: number): Promise<boolean> {
+    const like = await this.commentLikeRepository.findOne({
+      where: { userId, commentId },
+    });
+    return !!like;
   }
 }
