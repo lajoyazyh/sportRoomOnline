@@ -131,6 +131,19 @@ export class UserService {
     }
   }
 
+  // 根据token获取用户信息
+  async getUserByToken(token: string): Promise<User | null> {
+    try {
+      const payload = (await this.jwtService.verify(token)) as any;
+      const user = await this.userModel.findOne({
+        where: { userid: payload.userid },
+      });
+      return user;
+    } catch (error) {
+      return null;
+    }
+  }
+
   // 更新用户Profile信息
   async updateProfile(
     userid: number,

@@ -9,6 +9,31 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [averageRating, setAverageRating] = useState(0);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [canComment, setCanComment] = useState(false);
+  const [commentPermissionMessage, setCommentPermissionMessage] = useState('');
+  const [checkingPermission, setCheckingPermission] = useState(true);
+
+  // 检查评论权限
+  const checkCommentPermission = async () => {
+    try {
+      setCheckingPermission(true);
+      const response = await commentAPI.checkCommentPermission(activityId);
+      
+      if (response.success) {
+        setCanComment(response.data.canComment);
+        setCommentPermissionMessage(response.data.message || '');
+      } else {
+        setCanComment(false);
+        setCommentPermissionMessage(response.message || '无法检查评论权限');
+      }
+    } catch (error) {
+      console.error('检查评论权限失败:', error);
+      setCanComment(false);
+      setCommentPermissionMessage('网络错误，请稍后重试');
+    } finally {
+      setCheckingPermission(false);
+    }
+  };
 
   // 加载评论列表
   const loadComments = async (page = 1) => {
@@ -35,6 +60,7 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
   useEffect(() => {
     if (activityId) {
       loadComments();
+      checkCommentPermission();
     }
   }, [activityId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -98,12 +124,30 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
         </div>
         
         {showCreateForm && (
-          <button
-            onClick={() => setShowCommentForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            写评价
-          </button>
+          <div>
+            {checkingPermission ? (
+              <button disabled className="px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed">
+                检查权限中...
+              </button>
+            ) : canComment ? (
+              <button
+                onClick={() => setShowCommentForm(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                写评价
+              </button>
+            ) : (
+              <div className="flex flex-col items-start">
+                <button 
+                  disabled 
+                  className="px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed"
+                >
+                  写评价
+                </button>
+                <p className="text-sm text-gray-500 mt-1">{commentPermissionMessage}</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -297,7 +341,7 @@ const CommentForm = ({ activityId, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">写评价</h3>

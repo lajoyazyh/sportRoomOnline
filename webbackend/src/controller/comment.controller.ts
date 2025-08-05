@@ -285,4 +285,56 @@ export class CommentController {
       };
     }
   }
+
+  /**
+   * 检查用户评论权限
+   */
+  @Get('/permission/:activityId')
+  async checkCommentPermission(
+    @Param('activityId') activityId: number,
+    @Headers('authorization') authHeader: string
+  ) {
+    try {
+      if (!authHeader) {
+        return {
+          success: true,
+          data: {
+            canComment: false,
+            message: '请先登录',
+          },
+        };
+      }
+
+      const token = authHeader.split(' ')[1];
+      const user = await this.userService.getUserByToken(token);
+      
+      if (!user) {
+        return {
+          success: true,
+          data: {
+            canComment: false,
+            message: '请先登录',
+          },
+        };
+      }
+
+      const permissionCheck = await this.commentService.checkUserCanComment(
+        user.userid,
+        activityId
+      );
+      
+      return {
+        success: true,
+        data: {
+          canComment: permissionCheck.canComment,
+          message: permissionCheck.message,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  }
 }

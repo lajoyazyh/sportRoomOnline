@@ -239,4 +239,57 @@ export class CommentService {
 
     return comment;
   }
+
+  /**
+   * 检查用户是否可以评论活动
+   */
+  async checkUserCanComment(
+    userId: number,
+    activityId: number
+  ): Promise<{ canComment: boolean; message: string }> {
+    // 验证活动是否存在
+    const activity = await this.activityRepository.findOne({
+      where: { id: activityId },
+    });
+
+    if (!activity) {
+      return {
+        canComment: false,
+        message: '活动不存在',
+      };
+    }
+
+    // 验证用户是否参与过该活动
+    const registration = await this.registrationRepository.findOne({
+      where: {
+        userId,
+        activityId,
+        status: RegistrationStatus.APPROVED,
+      },
+    });
+
+    if (!registration) {
+      return {
+        canComment: false,
+        message: '只有参与过活动的用户才能评论',
+      };
+    }
+
+    // 检查是否已经评论过
+    const existingComment = await this.commentRepository.findOne({
+      where: { userId, activityId },
+    });
+
+    if (existingComment) {
+      return {
+        canComment: false,
+        message: '您已经评论过此活动',
+      };
+    }
+
+    return {
+      canComment: true,
+      message: '可以评论',
+    };
+  }
 }

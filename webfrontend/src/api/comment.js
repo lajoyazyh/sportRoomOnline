@@ -100,6 +100,11 @@ export const commentAPI = {
   getActivityRating: async (activityId) => {
     return request(`/api/comment/rating/${activityId}`);
   },
+
+  // 检查评论权限
+  checkCommentPermission: async (activityId) => {
+    return request(`/api/comment/permission/${activityId}`);
+  },
 };
 
 // 评分星级组件辅助函数
