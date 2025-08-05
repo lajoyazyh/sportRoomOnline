@@ -24,9 +24,70 @@
 ## 📸 项目展示
 
 ### 🎨 界面预览
+
 <div align="center">
-  <img src="https://via.placeholder.com/800x400/667eea/ffffff?text=SportRoomOnline+Demo" alt="项目主界面" />
-  <p><em>现代化的用户界面设计，支持响应式布局</em></p>
+
+#### 🔐 用户认证系统
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="项目演示/注册.png" alt="用户注册页面" width="400"/>
+      <h4>📝 用户注册</h4>
+      <p>简洁的注册界面，支持用户名、邮箱注册</p>
+    </td>
+    <td align="center" width="50%">
+      <img src="项目演示/登录.png" alt="用户登录页面" width="400"/>
+      <h4>🔑 用户登录</h4>
+      <p>安全的登录系统，JWT认证机制</p>
+    </td>
+  </tr>
+</table>
+
+#### 🏠 核心功能展示
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="项目演示/首页.png" alt="系统首页" width="400"/>
+      <h4>🏠 系统首页</h4>
+      <p>现代化的仪表盘设计，快速功能导航</p>
+    </td>
+    <td align="center" width="50%">
+      <img src="项目演示/活动广场.png" alt="活动广场页面" width="400"/>
+      <h4>🏃‍♂️ 活动广场</h4>
+      <p>丰富的活动展示，支持筛选和搜索</p>
+    </td>
+  </tr>
+</table>
+
+#### 📊 管理与订单系统
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="项目演示/活动管理.png" alt="活动管理页面" width="400"/>
+      <h4>⚙️ 活动管理</h4>
+      <p>完整的活动CRUD操作，报名审核功能</p>
+    </td>
+    <td align="center" width="50%">
+      <img src="项目演示/我的订单.png" alt="订单管理页面" width="400"/>
+      <h4>📋 我的订单</h4>
+      <p>订单状态追踪，支付管理系统</p>
+    </td>
+  </tr>
+</table>
+
+#### 👤 个人中心
+<table>
+  <tr>
+    <td align="center">
+      <img src="项目演示/个人信息.png" alt="个人信息页面" width="400"/>
+      <h4>👤 个人信息</h4>
+      <p>个性化资料管理，头像上传，照片墙功能</p>
+    </td>
+  </tr>
+</table>
+
+<p><em>✨ 现代化的响应式设计，完美支持移动端和桌面端</em></p>
+
 </div>
 
 ### 🏠 主要页面
