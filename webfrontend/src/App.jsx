@@ -13,6 +13,7 @@ import ActivityDetailPage from './pages/ActivityDetail/ActivityDetailPage';
 import ActivityReviewPage from './pages/ActivityReview/ActivityReviewPage';
 import OrderListPage from './pages/Order/OrderListPage';
 import PaymentPage from './pages/Order/PaymentPage';
+import MyCommentsPage from './pages/Comment/MyCommentsPage';
 import { getProfileApi } from './api/profile';
 
 function App() {
@@ -82,6 +83,7 @@ function App() {
         <Route path="manage" element={<ManagePage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="orders" element={<OrderListPage />} />
+        <Route path="comments" element={<MyCommentsPage />} />
       </Route>
       
       {/* 活动相关路由 */}
