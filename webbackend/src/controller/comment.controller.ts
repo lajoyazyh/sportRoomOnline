@@ -307,7 +307,7 @@ export class CommentController {
 
       const token = authHeader.split(' ')[1];
       const user = await this.userService.getUserByToken(token);
-      
+
       if (!user) {
         return {
           success: true,
@@ -322,7 +322,7 @@ export class CommentController {
         user.userid,
         activityId
       );
-      
+
       return {
         success: true,
         data: {
