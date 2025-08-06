@@ -88,6 +88,12 @@ export class Activity {
   @Column({ default: 0 })
   likeCount: number;
 
+  @Column({ nullable: true, length: 20 })
+  checkInCode: string; // 签到码(只有创建者可见)
+
+  @Column({ default: false })
+  checkInEnabled: boolean; // 是否开启签到
+
   @ManyToOne(() => User)
   @JoinColumn({ name: 'creatorId' })
   creator: User;

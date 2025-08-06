@@ -18,6 +18,7 @@
 - ✅ **订单支付**: 付费活动支付、订单管理、退款 (模拟支付)
 - ✅ **活动展示**: 列表浏览、详情查看、搜索筛选
 - ✅ **社交互动**: 评论评分、点赞系统、活动分享、权限控制
+- ✅ **签到系统**: 随机码生成、现场签到、记录管理、持久化存储
 - 🚧 **数据统计**: 活动数据分析、用户行为统计
 
 ### 功能状态说明
@@ -112,6 +113,8 @@ interface Activity {
   contactInfo?: string;     // 联系方式
   viewCount: number;        // 浏览次数
   likeCount: number;        // 点赞数
+  checkInCode?: string;     // 签到码 (6位随机码)
+  checkInEnabled: boolean;  // 签到功能启用状态
   creatorId: number;        // 创建者ID
   createdAt: Date;          // 创建时间
   updatedAt: Date;          // 更新时间
@@ -184,7 +187,21 @@ enum OrderStatus {
 }
 ```
 
-#### 5. Comment (评论实体) - ✅ 已完成
+#### 5. CheckIn (签到实体) - ✅ 已完成
+```typescript
+interface CheckIn {
+  id: number;               // 签到ID
+  userId: number;           // 用户ID
+  activityId: number;       // 活动ID
+  checkInTime: Date;        // 签到时间
+  checkInCode: string;      // 使用的签到码
+  isValid: boolean;         // 签到是否有效
+  createdAt: Date;          // 创建时间
+  updatedAt: Date;          // 更新时间
+}
+```
+
+#### 6. Comment (评论实体) - ✅ 已完成
 ```typescript
 interface Comment {
   id: number;               // 评论ID
@@ -372,15 +389,109 @@ GET    /api/comment/rating/:id       - 获取活动平均评分
 - **视觉反馈**: 点赞状态用不同颜色和填充样式区分
 - **外键安全**: 删除评论时自动清理相关点赞记录
 
-### 第五阶段: 高级功能 - 🚧 待开发
+### 第五阶段: 高级功能 - ✅ 已完成
 **目标**: 完善系统功能和用户体验
 
 **功能列表**:
-- [ ] 活动签到系统
+- ✅ **活动签到系统** - 已完成
+  - [x] 签到实体设计 (CheckIn实体)
+  - [x] Activity实体扩展 (checkInCode, checkInEnabled字段)
+  - [x] 签到API完整实现 (5个核心接口)
+  - [x] 签到管理界面开发 (CheckInManagement组件)
+  - [x] 用户签到界面开发 (CheckInComponent组件)
+  - [x] 签到码持久化存储
+  - [x] 权限验证和安全控制
+  - [x] 实时状态同步
+
+**后端任务**:
+- [x] 创建CheckIn实体和数据表
+- [x] 扩展Activity实体添加签到字段
+- [x] 实现签到码生成算法 (6位随机码)
+- [x] 实现签到API接口 (创建、验证、查询)
+- [x] 添加签到权限验证 (报名状态、支付状态)
+- [x] 实现防重复签到机制
+
+**前端任务**:
+- [x] 设计签到管理组件 (CheckInManagement.jsx)
+- [x] 设计用户签到组件 (CheckInComponent.jsx)
+- [x] 实现签到码生成和展示
+- [x] 实现签到状态检查和验证
+- [x] 集成到活动详情页面
+- [x] 集成到活动管理页面
+- [x] 实现持久化状态恢复
+
+**API接口设计**:
+```
+POST   /api/checkin/:activityId/code    - 生成签到码 (创建者权限)
+POST   /api/checkin/:activityId         - 用户签到
+GET    /api/checkin/:activityId/status  - 获取签到状态
+GET    /api/checkin/:activityId         - 获取签到记录 (创建者权限)
+PUT    /api/checkin/:activityId/disable - 停止签到 (创建者权限)
+```
+
+**功能特色**:
+- **随机码生成**: 6位大写字母数字组合，避免重复
+- **持久化存储**: 签到码存储在数据库，支持长期保持
+- **权限控制**: 严格的创建者权限验证和用户签到资格检查
+- **防重复机制**: 数据库唯一约束防止重复签到
+- **实时同步**: 前后端状态实时同步，支持多设备访问
 - [ ] 积分奖励机制
 - [ ] 数据统计dashboard
 - [ ] 移动端响应式优化
 - [ ] 消息推送系统
+
+#### 活动签到系统设计
+**功能描述**: 用户参与活动时通过签到码签到，记录实际参与情况
+
+**签到流程**:
+1. **活动发布者操作**: 
+   - 在活动管理页面可以随时生成/更新签到码
+   - 签到码只有活动发布者可见
+   - 可以在活动现场口头告知参与者签到码
+2. **参与者操作**:
+   - 在活动详情页面输入签到码进行签到
+   - 只有报名且支付成功的用户才能签到
+   - 每个用户每个活动只能签到一次
+
+**签到规则**:
+- 活动发布者可以随时生成/更新签到码
+- 只有报名且支付成功的用户才能签到
+- 每个用户每个活动只能签到一次
+- 签到码验证成功即完成签到
+
+**奖励机制**:
+- 首次签到获得经验值
+- 签到记录影响用户信誉度
+- 活动完成后获得参与证书
+- 后续可扩展积分奖励机制
+
+**数据结构**:
+```typescript
+// Activity实体增加字段
+interface Activity {
+  // ... 现有字段
+  checkInCode?: string;     // 签到码(只有创建者可见)
+  checkInEnabled: boolean;  // 是否开启签到
+}
+
+interface CheckIn {
+  id: number;               // 签到ID
+  userId: number;           // 用户ID
+  activityId: number;       // 活动ID
+  checkInTime: Date;        // 签到时间
+  checkInCode: string;      // 使用的签到码
+  isValid: boolean;         // 是否有效签到
+  createdAt: Date;          // 创建时间
+}
+```
+
+**API接口设计**:
+```
+POST   /api/activity/:id/checkin-code    - 生成/更新签到码(创建者)
+POST   /api/activity/:id/checkin         - 用户签到
+GET    /api/activity/:id/checkin-status  - 获取签到状态
+GET    /api/activity/:id/checkin-list    - 获取签到列表(创建者)
+```
 
 ---
 

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getActivityDetailApi } from '../../api/activity';
 import CommentList from '../../components/CommentList';
+import CheckInComponent from '../../components/CheckInComponent';
+import CheckInManagement from '../../components/CheckInManagement';
 
 const API_BASE_URL = 'http://localhost:7001';
 
@@ -619,6 +621,18 @@ export default function ActivityDetailPage() {
               })()}
             </div>
           </div>
+        </div>
+
+        {/* 签到区域 */}
+        <div className="mt-8">
+          {currentUser && activity && currentUser.id === activity.creatorId ? (
+            <CheckInManagement 
+              activityId={parseInt(id)} 
+              isCreator={true}
+            />
+          ) : (
+            <CheckInComponent activityId={parseInt(id)} />
+          )}
         </div>
 
         {/* 评论区域 */}

@@ -3,7 +3,7 @@
 // 管理我创建的活动和我参与的活动
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:7001';
 
@@ -12,6 +12,12 @@ function ManagePage() {
   const [joinedActivities, setJoinedActivities] = useState([]);
   const [activeTab, setActiveTab] = useState('created'); // 'created' | 'joined'
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // 导航到签到管理页面
+  const handleNavigateToCheckIn = (activityId) => {
+    navigate(`/activity/review/${activityId}`, { state: { defaultTab: 'checkin' } });
+  };
 
   // 获取我创建的活动
   const fetchMyActivities = async () => {
@@ -302,12 +308,20 @@ function ManagePage() {
                                 </button>
                               )}
                               {activity.status === 'published' && (
-                                <Link
-                                  to={`/activity/review/${activity.id}`}
-                                  className="text-blue-600 hover:text-blue-900 no-underline"
-                                >
-                                  审核
-                                </Link>
+                                <>
+                                  <Link
+                                    to={`/activity/review/${activity.id}`}
+                                    className="text-blue-600 hover:text-blue-900 no-underline mr-4"
+                                  >
+                                    审核
+                                  </Link>
+                                  <button
+                                    onClick={() => handleNavigateToCheckIn(activity.id)}
+                                    className="text-green-600 hover:text-green-900 bg-transparent border-none cursor-pointer"
+                                  >
+                                    签到
+                                  </button>
+                                </>
                               )}
                               {activity.currentParticipants === 0 && (
                                 <button

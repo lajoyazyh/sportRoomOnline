@@ -14,11 +14,12 @@
 
 ### ✨ 核心特色
 
-- 🎯 **功能完整**：用户系统、活动管理、报名支付、社交互动、点赞系统
+- 🎯 **功能完整**：用户系统、活动管理、报名支付、社交互动、签到系统
 - 🏗️ **架构现代**：React + Node.js + TypeScript 技术栈
 - 🔒 **安全可靠**：JWT 认证、数据验证、权限控制
 - 📱 **响应式设计**：完美支持移动端和桌面端
 - 💬 **社交功能**：评论评分、智能点赞、权限控制
+- 📋 **签到管理**：随机码生成、持久化存储、实时状态同步
 - 🛠️ **开发友好**：完整 CI/CD、自动化测试、代码质量监控
 - ⚡ **性能优化**：前端懒加载、后端查询优化
 - 🎨 **用户体验**：内联表单、视觉反馈、权限预检查
@@ -96,10 +97,12 @@
 
 | 页面 | 功能描述 | 技术特点 |
 |------|----------|----------|
-| 🏠 **首页** | 活动展示、快速导航 | 响应式设计、动态数据加载 |
+| 🏠 **系统首页** | 活动概览、快速导航 | 数据统计、可视化图表 |
+| 🏃‍♂️ **活动广场** | 活动浏览、搜索筛选 | 分页加载、多维筛选 |
 | 👤 **用户中心** | 个人资料、报名记录 | JWT认证、文件上传 |
 | 📅 **活动管理** | 创建、编辑、删除活动 | CRUD操作、权限控制 |
 | 📝 **报名系统** | 在线报名、状态管理 | 实时更新、订单跟踪 |
+| 📋 **签到系统** | 签到码生成、签到管理 | 随机码算法、持久化存储 |
 | 💬 **社交广场** | 用户动态、互动交流 | 社交功能、内容管理 |
 
 ## 🛠️ 技术架构
@@ -223,6 +226,15 @@ PUT    /api/registration/:id  # 更新报名状态
 DELETE /api/registration/:id  # 取消报名
 ```
 
+### 📋 签到系统
+```http
+POST   /api/checkin/:activityId/code    # 生成签到码 (创建者)
+POST   /api/checkin/:activityId         # 用户签到
+GET    /api/checkin/:activityId/status  # 获取签到状态
+GET    /api/checkin/:activityId         # 获取签到记录 (创建者)
+PUT    /api/checkin/:activityId/disable # 停止签到 (创建者)
+```
+
 ### 📁 文件服务
 ```http
 POST /api/upload              # 文件上传
@@ -252,6 +264,8 @@ GET  /uploads/:filename       # 文件访问
 ├── location (地点)
 ├── maxParticipants (最大参与人数)
 ├── price (价格)
+├── checkInCode (签到码)
+├── checkInEnabled (签到启用状态)
 └── creatorId (创建者ID) → User.id
 
 📝 Registration (报名)
@@ -261,6 +275,14 @@ GET  /uploads/:filename       # 文件访问
 ├── status (状态)
 ├── registrationTime (报名时间)
 └── notes (备注)
+
+📋 CheckIn (签到)
+├── id (主键)
+├── userId (用户ID) → User.id
+├── activityId (活动ID) → Activity.id
+├── checkInTime (签到时间)
+├── checkInCode (使用的签到码)
+└── isValid (是否有效)
 ```
 
 ## 🧪 测试覆盖
