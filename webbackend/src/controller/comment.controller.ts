@@ -229,13 +229,36 @@ export class CommentController {
    * 点赞评论
    */
   @Post('/:id/like')
-  async likeComment(@Param('id') id: number) {
+  async likeComment(
+    @Param('id') id: number,
+    @Headers('authorization') authHeader: string
+  ) {
     try {
-      const comment = await this.commentService.toggleLikeComment(id, true);
+      if (!authHeader) {
+        return {
+          success: false,
+          message: '请先登录',
+        };
+      }
+
+      const token = authHeader.split(' ')[1];
+      const user = await this.userService.getUserByToken(token);
+
+      if (!user) {
+        return {
+          success: false,
+          message: '请先登录',
+        };
+      }
+
+      const result = await this.commentService.toggleCommentLike(
+        user.userid,
+        id
+      );
       return {
         success: true,
-        data: comment,
-        message: '点赞成功',
+        data: result,
+        message: result.liked ? '点赞成功' : '取消点赞成功',
       };
     } catch (error) {
       return {
@@ -246,16 +269,39 @@ export class CommentController {
   }
 
   /**
-   * 取消点赞评论
+   * 取消点赞评论 (已合并到点赞API中)
    */
   @Del('/:id/like')
-  async unlikeComment(@Param('id') id: number) {
+  async unlikeComment(
+    @Param('id') id: number,
+    @Headers('authorization') authHeader: string
+  ) {
     try {
-      const comment = await this.commentService.toggleLikeComment(id, false);
+      if (!authHeader) {
+        return {
+          success: false,
+          message: '请先登录',
+        };
+      }
+
+      const token = authHeader.split(' ')[1];
+      const user = await this.userService.getUserByToken(token);
+
+      if (!user) {
+        return {
+          success: false,
+          message: '请先登录',
+        };
+      }
+
+      const result = await this.commentService.toggleCommentLike(
+        user.userid,
+        id
+      );
       return {
         success: true,
-        data: comment,
-        message: '取消点赞成功',
+        data: result,
+        message: result.liked ? '点赞成功' : '取消点赞成功',
       };
     } catch (error) {
       return {
@@ -277,6 +323,101 @@ export class CommentController {
       return {
         success: true,
         data: { averageRating },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  }
+
+  /**
+   * 检查用户评论权限
+   */
+  @Get('/permission/:activityId')
+  async checkCommentPermission(
+    @Param('activityId') activityId: number,
+    @Headers('authorization') authHeader: string
+  ) {
+    try {
+      if (!authHeader) {
+        return {
+          success: true,
+          data: {
+            canComment: false,
+            message: '请先登录',
+          },
+        };
+      }
+
+      const token = authHeader.split(' ')[1];
+      const user = await this.userService.getUserByToken(token);
+
+      if (!user) {
+        return {
+          success: true,
+          data: {
+            canComment: false,
+            message: '请先登录',
+          },
+        };
+      }
+
+      const permissionCheck = await this.commentService.checkUserCanComment(
+        user.userid,
+        activityId
+      );
+
+      return {
+        success: true,
+        data: {
+          canComment: permissionCheck.canComment,
+          message: permissionCheck.message,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  }
+
+  /**
+   * 检查用户点赞状态
+   */
+  @Get('/:id/like-status')
+  async checkUserLiked(
+    @Param('id') commentId: number,
+    @Headers('authorization') authHeader: string
+  ) {
+    try {
+      if (!authHeader) {
+        return {
+          success: true,
+          data: { liked: false },
+        };
+      }
+
+      const token = authHeader.split(' ')[1];
+      const user = await this.userService.getUserByToken(token);
+
+      if (!user) {
+        return {
+          success: true,
+          data: { liked: false },
+        };
+      }
+
+      const liked = await this.commentService.checkUserLiked(
+        user.userid,
+        commentId
+      );
+
+      return {
+        success: true,
+        data: { liked },
       };
     } catch (error) {
       return {

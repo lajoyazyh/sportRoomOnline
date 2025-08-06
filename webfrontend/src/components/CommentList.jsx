@@ -9,6 +9,31 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [averageRating, setAverageRating] = useState(0);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [canComment, setCanComment] = useState(false);
+  const [commentPermissionMessage, setCommentPermissionMessage] = useState('');
+  const [checkingPermission, setCheckingPermission] = useState(true);
+
+  // 检查评论权限
+  const checkCommentPermission = async () => {
+    try {
+      setCheckingPermission(true);
+      const response = await commentAPI.checkCommentPermission(activityId);
+      
+      if (response.success) {
+        setCanComment(response.data.canComment);
+        setCommentPermissionMessage(response.data.message || '');
+      } else {
+        setCanComment(false);
+        setCommentPermissionMessage(response.message || '无法检查评论权限');
+      }
+    } catch (error) {
+      console.error('检查评论权限失败:', error);
+      setCanComment(false);
+      setCommentPermissionMessage('网络错误，请稍后重试');
+    } finally {
+      setCheckingPermission(false);
+    }
+  };
 
   // 加载评论列表
   const loadComments = async (page = 1) => {
@@ -17,7 +42,24 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
       const response = await commentAPI.getActivityComments(activityId, page, 10);
       
       if (response.success) {
-        setComments(response.data.comments);
+        const commentsWithLikeStatus = await Promise.all(
+          response.data.comments.map(async (comment) => {
+            try {
+              const likeStatusResponse = await commentAPI.checkUserLiked(comment.id);
+              return {
+                ...comment,
+                userLiked: likeStatusResponse.success ? likeStatusResponse.data.liked : false
+              };
+            } catch {
+              return {
+                ...comment,
+                userLiked: false
+              };
+            }
+          })
+        );
+        
+        setComments(commentsWithLikeStatus);
         setTotalPages(Math.ceil(response.data.total / 10));
         setCurrentPage(page);
         setAverageRating(response.data.averageRating || 0);
@@ -35,6 +77,7 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
   useEffect(() => {
     if (activityId) {
       loadComments();
+      checkCommentPermission();
     }
   }, [activityId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -45,16 +88,27 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
     return date.toLocaleString('zh-CN');
   };
 
-  // 处理点赞
+    // 处理点赞切换
   const handleLike = async (commentId) => {
     try {
-      const response = await commentAPI.likeComment(commentId);
+      const response = await commentAPI.toggleLike(commentId);
       if (response.success) {
-        // 重新加载评论列表
-        loadComments(currentPage);
+        // 更新本地评论状态
+        setComments(comments.map(comment => {
+          if (comment.id === commentId) {
+            return {
+              ...comment,
+              likeCount: response.data.likeCount,
+              userLiked: response.data.liked
+            };
+          }
+          return comment;
+        }));
+      } else {
+        console.error('点赞操作失败:', response.message);
       }
     } catch (error) {
-      console.error('点赞失败:', error);
+      console.error('点赞操作失败:', error);
     }
   };
 
@@ -98,12 +152,30 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
         </div>
         
         {showCreateForm && (
-          <button
-            onClick={() => setShowCommentForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            写评价
-          </button>
+          <div>
+            {checkingPermission ? (
+              <button disabled className="px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed">
+                检查权限中...
+              </button>
+            ) : canComment ? (
+              <button
+                onClick={() => setShowCommentForm(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                写评价
+              </button>
+            ) : (
+              <div className="flex flex-col items-start">
+                <button 
+                  disabled 
+                  className="px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed"
+                >
+                  写评价
+                </button>
+                <p className="text-sm text-gray-500 mt-1">{commentPermissionMessage}</p>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -191,9 +263,18 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
               <div className="flex items-center">
                 <button
                   onClick={() => handleLike(comment.id)}
-                  className="flex items-center text-gray-500 hover:text-blue-600 transition-colors"
+                  className={`flex items-center transition-colors ${
+                    comment.userLiked 
+                      ? 'text-blue-600 hover:text-blue-700' 
+                      : 'text-gray-500 hover:text-blue-600'
+                  }`}
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg 
+                    className="w-4 h-4 mr-1" 
+                    fill={comment.userLiked ? "currentColor" : "none"} 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L9 7.5v2.5m7-10V4.375c0 .518-.421.937-.937.937H14V0z" />
                   </svg>
                   <span className="text-sm">{comment.likeCount || 0}</span>
@@ -241,11 +322,11 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
         </div>
       )}
 
-      {/* 评论表单弹窗 */}
-      {showCommentForm && (
-        <CommentForm
+      {/* 内联评论表单 */}
+      {showCommentForm && canComment && (
+        <InlineCommentForm
           activityId={activityId}
-          onClose={() => setShowCommentForm(false)}
+          onCancel={() => setShowCommentForm(false)}
           onSuccess={() => {
             setShowCommentForm(false);
             loadComments(1); // 重新加载第一页
@@ -256,8 +337,8 @@ const CommentList = ({ activityId, showCreateForm = true }) => {
   );
 };
 
-// 评论表单组件
-const CommentForm = ({ activityId, onClose, onSuccess }) => {
+// 内联评论表单组件
+const InlineCommentForm = ({ activityId, onCancel, onSuccess }) => {
   const [formData, setFormData] = useState({
     content: '',
     rating: 5,
@@ -297,93 +378,91 @@ const CommentForm = ({ activityId, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">写评价</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
+    <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">写评价</h3>
+        <button
+          onClick={onCancel}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        {/* 评分选择 */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            评分
+          </label>
+          <div className="flex items-center">
+            {[1, 2, 3, 4, 5].map((rating) => (
+              <button
+                key={rating}
+                type="button"
+                onClick={() => setFormData({ ...formData, rating })}
+                className="focus:outline-none mr-1"
+              >
+                <svg
+                  className={`w-8 h-8 ${
+                    rating <= formData.rating ? 'text-yellow-400' : 'text-gray-300'
+                  } hover:text-yellow-400 transition-colors`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </button>
+            ))}
+            <span className="ml-2 text-sm text-gray-600">
+              {getRatingText(formData.rating)}
+            </span>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {/* 评分选择 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              评分
-            </label>
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((rating) => (
-                <button
-                  key={rating}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, rating })}
-                  className="focus:outline-none"
-                >
-                  <svg
-                    className={`w-8 h-8 ${
-                      rating <= formData.rating ? 'text-yellow-400' : 'text-gray-300'
-                    } hover:text-yellow-400 transition-colors`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                </button>
-              ))}
-              <span className="ml-2 text-sm text-gray-600">
-                {getRatingText(formData.rating)}
-              </span>
-            </div>
+        {/* 评价内容 */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            评价内容
+          </label>
+          <textarea
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            rows={4}
+            placeholder="分享你的活动体验..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            maxLength={500}
+          />
+          <div className="text-right text-sm text-gray-500 mt-1">
+            {formData.content.length}/500
           </div>
+        </div>
 
-          {/* 评价内容 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              评价内容
-            </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              rows={4}
-              placeholder="分享你的活动体验..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              maxLength={500}
-            />
-            <div className="text-right text-sm text-gray-500 mt-1">
-              {formData.content.length}/500
-            </div>
+        {/* 错误提示 */}
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-red-600 text-sm">{error}</p>
           </div>
+        )}
 
-          {/* 错误提示 */}
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
-
-          {/* 提交按钮 */}
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              取消
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {submitting ? '发布中...' : '发布评价'}
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* 提交按钮 */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            取消
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {submitting ? '发布中...' : '发布评价'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

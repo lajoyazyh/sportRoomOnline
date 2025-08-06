@@ -3,12 +3,14 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Activity } from './activity.entity';
 import { User } from './user.entity';
+import { CommentLike } from './commentLike.entity';
 
 @Entity('comments')
 export class Comment {
@@ -48,4 +50,8 @@ export class Comment {
   @ManyToOne(() => Activity)
   @JoinColumn({ name: 'activityId' })
   activity: Activity;
+
+  // 关联点赞记录
+  @OneToMany(() => CommentLike, commentLike => commentLike.comment)
+  likes: CommentLike[];
 }

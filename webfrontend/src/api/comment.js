@@ -96,9 +96,26 @@ export const commentAPI = {
     });
   },
 
+  // 切换点赞状态 (智能切换)
+  toggleLike: async (commentId) => {
+    return request(`/api/comment/${commentId}/like`, {
+      method: 'POST',
+    });
+  },
+
+  // 检查用户点赞状态
+  checkUserLiked: async (commentId) => {
+    return request(`/api/comment/${commentId}/like-status`);
+  },
+
   // 获取活动平均评分
   getActivityRating: async (activityId) => {
     return request(`/api/comment/rating/${activityId}`);
+  },
+
+  // 检查评论权限
+  checkCommentPermission: async (activityId) => {
+    return request(`/api/comment/permission/${activityId}`);
   },
 };
 
