@@ -188,20 +188,20 @@ function CreateActivityPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">创建活动</h1>
-        <p className="text-gray-600">发布一个新的体育活动，邀请大家一起参与</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">创建活动</h1>
+        <p className="text-gray-600 text-sm sm:text-base">发布一个新的体育活动，邀请大家一起参与</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* 基本信息 */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">基本信息</h3>
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               活动标题 <span className="text-red-500">*</span>
             </label>
@@ -211,12 +211,12 @@ function CreateActivityPage() {
               value={formData.title}
               onChange={handleInputChange}
               placeholder="输入活动标题"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
             />
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               活动描述 <span className="text-red-500">*</span>
             </label>
@@ -226,12 +226,12 @@ function CreateActivityPage() {
               onChange={handleInputChange}
               rows="4"
               placeholder="详细描述活动内容、规则等信息"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base resize-none"
               required
             />
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               活动类型 <span className="text-red-500">*</span>
             </label>
@@ -239,7 +239,7 @@ function CreateActivityPage() {
               name="type"
               value={formData.type}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
             >
               {activityTypes.map((type) => (
@@ -250,7 +250,7 @@ function CreateActivityPage() {
             </select>
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               活动地点 <span className="text-red-500">*</span>
             </label>
@@ -260,17 +260,17 @@ function CreateActivityPage() {
               value={formData.location}
               onChange={handleInputChange}
               placeholder="具体地址或场馆名称"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
             />
           </div>
 
           {/* 时间设置 */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">时间设置</h3>
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               开始时间 <span className="text-red-500">*</span>
             </label>
@@ -279,12 +279,12 @@ function CreateActivityPage() {
               name="startTime"
               value={formData.startTime}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
             />
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               结束时间 <span className="text-red-500">*</span>
             </label>
@@ -293,12 +293,12 @@ function CreateActivityPage() {
               name="endTime"
               value={formData.endTime}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
             />
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               报名截止时间 <span className="text-red-500">*</span>
             </label>
@@ -307,17 +307,17 @@ function CreateActivityPage() {
               name="registrationDeadline"
               value={formData.registrationDeadline}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
               required
             />
           </div>
 
           {/* 参与设置 */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">参与设置</h3>
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">最少参与人数</label>
             <input
               type="number"
@@ -325,11 +325,11 @@ function CreateActivityPage() {
               value={formData.minParticipants}
               onChange={handleInputChange}
               min="1"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
             />
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">最多参与人数</label>
             <input
               type="number"
@@ -337,11 +337,11 @@ function CreateActivityPage() {
               value={formData.maxParticipants}
               onChange={handleInputChange}
               min="1"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
             />
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">活动费用 (元)</label>
             <input
               type="number"
@@ -351,16 +351,16 @@ function CreateActivityPage() {
               min="0"
               step="0.01"
               placeholder="0"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
             />
           </div>
 
           {/* 其他信息 */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-6">其他信息</h3>
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">参与要求</label>
             <textarea
               name="requirements"
@@ -368,11 +368,11 @@ function CreateActivityPage() {
               onChange={handleInputChange}
               rows="3"
               placeholder="对参与者的要求，如技能水平、装备等"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base resize-none"
             />
           </div>
 
-          <div>
+          <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">所需设备</label>
             <textarea
               name="equipment"
@@ -380,11 +380,11 @@ function CreateActivityPage() {
               onChange={handleInputChange}
               rows="3"
               placeholder="需要携带的设备或器材"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base resize-none"
             />
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">联系方式</label>
             <input
               type="text"
@@ -392,12 +392,12 @@ function CreateActivityPage() {
               value={formData.contactInfo}
               onChange={handleInputChange}
               placeholder="微信号、QQ号或手机号等"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
             />
           </div>
 
           {/* 图片上传 */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">活动图片</label>
             <input
               type="file"
@@ -433,11 +433,11 @@ function CreateActivityPage() {
         </div>
 
         {/* 提交按钮 */}
-        <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-8 pt-6 border-t border-gray-200">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            className="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-base font-medium min-h-[48px]"
           >
             取消
           </button>
@@ -445,14 +445,14 @@ function CreateActivityPage() {
             type="button"
             onClick={(e) => handleSubmit(e, true)}
             disabled={loading}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-base font-medium min-h-[48px]"
           >
             {loading ? '保存中...' : '保存草稿'}
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-base font-medium min-h-[48px]"
           >
             {loading ? '发布中...' : '发布活动'}
           </button>

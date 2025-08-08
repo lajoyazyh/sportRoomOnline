@@ -2,17 +2,19 @@
 // 活动报名审核页面 - 活动创建者审核报名申请
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import CheckInManagement from '../../components/CheckInManagement';
 
 const API_BASE_URL = 'http://localhost:7001';
 
 function ActivityReviewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activity, setActivity] = useState(null);
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'rejected'
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'rejected' | 'checkin'
 
   // 获取活动信息
   const fetchActivity = useCallback(async () => {
@@ -125,11 +127,19 @@ function ActivityReviewPage() {
   useEffect(() => {
     if (id) {
       fetchActivity();
+      // 检查location.state是否有defaultTab参数
+      if (location.state?.defaultTab) {
+        setActiveTab(location.state.defaultTab);
+      }
+      // 检查URL hash，如果有#checkin则切换到签到管理标签
+      else if (window.location.hash === '#checkin') {
+        setActiveTab('checkin');
+      }
     }
-  }, [id, fetchActivity]);
+  }, [id, fetchActivity, location.state]);
 
   useEffect(() => {
-    if (id && activeTab) {
+    if (id && activeTab && activeTab !== 'checkin') {
       fetchRegistrations(activeTab);
     }
   }, [id, activeTab, fetchRegistrations]);
@@ -222,23 +232,39 @@ function ActivityReviewPage() {
               >
                 已拒绝
               </button>
+              <button
+                onClick={() => setActiveTab('checkin')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'checkin'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                签到管理
+              </button>
             </nav>
           </div>
         </div>
 
         {/* 报名列表 */}
-        <div className="bg-white rounded-lg shadow-sm">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">加载中...</p>
-            </div>
-          ) : registrations.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-6xl mb-4">📝</div>
-              <p className="text-gray-600 text-lg">暂无{getStatusText(activeTab)}的报名</p>
-            </div>
-          ) : (
+        {activeTab === 'checkin' ? (
+          <CheckInManagement 
+            activityId={parseInt(id)} 
+            isCreator={true}
+          />
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm">
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">加载中...</p>
+              </div>
+            ) : registrations.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">📝</div>
+                <p className="text-gray-600 text-lg">暂无{getStatusText(activeTab)}的报名</p>
+              </div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -327,8 +353,9 @@ function ActivityReviewPage() {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
