@@ -22,9 +22,7 @@ const ActivityType = {
 const ActivityStatus = {
   draft: '草稿',
   published: '已发布',
-  ongoing: '进行中',
-  completed: '已完成',
-  cancelled: '已取消',
+
 };
 
 export default function ActivityDetailPage() {

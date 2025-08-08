@@ -35,9 +35,9 @@ function SquarePage() {
     { value: '', label: '全部状态' },
     { value: 'draft', label: '草稿' },
     { value: 'published', label: '已发布' },
-    { value: 'ongoing', label: '进行中' },
-    { value: 'completed', label: '已完成' },
-    { value: 'cancelled', label: '已取消' }
+    // { value: 'ongoing', label: '进行中' },
+    // { value: 'completed', label: '已完成' },
+    // { value: 'cancelled', label: '已取消' }
   ];
 
   // 获取活动列表
